@@ -11,6 +11,7 @@ env:
   binary: the-just-two
   add_binaries_to_github_release: true
   itch_target: lee-orr/the-just-two
+  release_version: ${{ (github.ref_type == 'tag' && github.ref_name) || format('{0}_{1}', github.ref_name, github.run_number) }}
 
 concurrency:
   group: release
@@ -23,8 +24,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: little-core-labs/get-git-tag@v3.0.1
-        id: get_version
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
@@ -34,21 +33,14 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt-get update; sudo apt-get install pkg-config libx11-dev libasound2-dev libudev-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev alsa
-      - name: install wasm-bindgen-cli
-        run: |
-          cargo install wasm-bindgen-cli
 
       - name: Build
         run: |
-          cargo build --release --target wasm32-unknown-unknown
-
-      - name: Prepare package
-        run: |
-          wasm-bindgen --no-typescript --out-name bevy_game --out-dir wasm --target web target/wasm32-unknown-unknown/release/${{ env.binary }}.wasm
-          cp -r assets wasm/
+          cargo install wasm-bindgen-cli
+          ./build.sh
 
       - name: Package as a zip
-        working-directory: ./wasm
+        working-directory: ./dist
         run: |
           zip --recurse-paths ../${{ env.binary }}.zip .
 
@@ -58,14 +50,20 @@ jobs:
           path: ${{ env.binary }}.zip
           name: wasm
 
+      - name: Upload folder to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./dist
+          name: wasm_pages
+
       - name: Upload binaries to release
         if: ${{ env.add_binaries_to_github_release == 'true' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.binary }}.zip
-          asset_name: ${{ env.binary }}-wasm-${{ steps.get_version.outputs.tag }}.zip
-          tag: ${{ github.ref }}
+          asset_name: ${{ env.binary }}-wasm-${{ env.release_version }}.zip
+          tag: ${{ env.release_version }}
           overwrite: true
 
   # Build for Linux
@@ -73,8 +71,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: little-core-labs/get-git-tag@v3.0.1
-        id: get_version
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
@@ -112,8 +108,8 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.binary }}.zip
-          asset_name: ${{ env.binary }}-linux-${{ steps.get_version.outputs.tag }}.zip
-          tag: ${{ github.ref }}
+          asset_name: ${{ env.binary }}-linux-${{ env.release_version }}.zip
+          tag: ${{ env.release_version }}
           overwrite: true
 
   # Build for Windows
@@ -121,8 +117,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: little-core-labs/get-git-tag@v3.0.1
-        id: get_version
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
@@ -156,8 +150,8 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.binary }}.zip
-          asset_name: ${{ env.binary }}-windows-${{ steps.get_version.outputs.tag }}.zip
-          tag: ${{ github.ref }}
+          asset_name: ${{ env.binary }}-windows-${{ env.release_version }}.zip
+          tag: ${{ env.release_version }}
           overwrite: true
 
   # Build for macOS
@@ -165,8 +159,6 @@ jobs:
     runs-on: macOS-latest
 
     steps:
-      - uses: little-core-labs/get-git-tag@v3.0.1
-        id: get_version
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
@@ -201,8 +193,8 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.binary }}.dmg
-          asset_name: ${{ env.binary }}-macos-${{ steps.get_version.outputs.tag }}.dmg
-          tag: ${{ github.ref }}
+          asset_name: ${{ env.binary }}-macos-${{ env.release_version }}.dmg
+          tag: ${{ env.release_version }}
           overwrite: true
 
   check-if-upload-to-itch-is-configured:
@@ -217,6 +209,27 @@ jobs:
           else
             echo "::set-output name=has-itch-target::yes"
           fi
+      - name: validate ref
+        run: echo "RELEASE - ${{ env.release_version}}"
+
+  upload-to-github:
+    runs-on: ubuntu-latest
+    needs: release-wasm
+
+    permissions:
+      pages: write # to deploy to Pages
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to Github Pages
+        id: deploy
+        uses: actions/deploy-pages@v2
+        with:
+          artifact_name: wasm_pages
 
   upload-to-itch:
     runs-on: ubuntu-latest
@@ -240,8 +253,7 @@ jobs:
           unzip butler.zip
           chmod +x butler
           ./butler -V
-      - uses: little-core-labs/get-git-tag@v3.0.1
-        id: get_version
+
       - name: Upload to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_CREDENTIALS }}
@@ -249,7 +261,7 @@ jobs:
           for channel in $(ls builds); do
             ./butler push \
                 --fix-permissions \
-                --userversion="${{ steps.get_version.outputs.tag }}" \
+                --userversion="${{ env.release_version }}" \
                 builds/$channel/* \
                 ${{ env.itch_target }}:$channel
           done

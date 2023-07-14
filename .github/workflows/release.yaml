@@ -55,11 +55,15 @@ jobs:
           path: ${{ env.binary }}.zip
           name: wasm
 
-      - name: Upload folder to artifacts
-        uses: actions/upload-artifact@v3
+      - name: Fix permissions
+        run: |
+          chmod -c -R +rX "dist/" | while read line; do
+            echo "::warning title=Invalid file permissions automatically fixed::$line"
+          done
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v2
         with:
           path: ./dist
-          name: wasm_pages
 
       - name: Upload binaries to release
         if: ${{ env.add_binaries_to_github_release == 'true' }}
@@ -234,7 +238,7 @@ jobs:
         id: deploy
         uses: actions/deploy-pages@v2
         with:
-          artifact_name: wasm_pages
+          artifact_name: github-pages
 
   upload-to-itch:
     runs-on: ubuntu-latest
@@ -253,7 +257,7 @@ jobs:
           path: ./builds
       
       - name: remove pages
-        run: rm -rf ./builds/wasm_pages
+        run: rm -rf ./builds/github-pages
 
       - name: Install butler
         run: |

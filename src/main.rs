@@ -1,11 +1,9 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
-use bevy_proto::prelude::ProtoPlugin;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(ProtoPlugin::new())
-        .add_startup_system(setup)
+        .add_systems(Startup, setup)
         .run();
 }
 

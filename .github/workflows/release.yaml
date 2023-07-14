@@ -251,6 +251,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./builds
+      
+      - name: remove pages
+        run: rm -rf ./builds/wasm_pages
 
       - name: Install butler
         run: |

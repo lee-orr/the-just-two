@@ -9,7 +9,7 @@ on:
 env:
   # update with the name of the main binary
   binary: the-just-two
-  add_binaries_to_github_release: true
+  add_binaries_to_github_release: github.ref_type == 'tag' && github.ref_name && true
   itch_target: lee-orr/the-just-two
   release_version: ${{ (github.ref_type == 'tag' && github.ref_name) || format('{0}_{1}', github.ref_name, github.run_number) }}
 

@@ -7,9 +7,9 @@ on:
 
 env:
   # update with the name of the main binary
-  binary: philosophical-zombies
+  binary: the-just-two
   add_binaries_to_github_release: true
-  itch_target: lee-orr/philosophical-zombies
+  itch_target: lee-orr/the-just-two
 
 concurrency:
   group: release

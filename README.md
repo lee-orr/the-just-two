@@ -1,1 +1,1 @@
-# philosophical-zombies
+# The Just Two

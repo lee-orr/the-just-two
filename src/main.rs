@@ -10,6 +10,7 @@ fn main() {
             ..default()
         }))
         .add_systems(Startup, setup)
+        .add_systems(Update, spawn_audio)
         .run();
 }
 
@@ -56,4 +57,28 @@ fn setup(
         transform: Transform::from_translation(Vec3::new(150., 0., 0.)),
         ..default()
     });
+}
+
+fn spawn_audio(
+    mut commands: Commands,
+    query: Query<&AudioSink>,
+    asset_server: Res<AssetServer>,
+    keys: Res<Input<KeyCode>>,
+) {
+    if keys.just_pressed(KeyCode::Space) {
+        if query.is_empty() {
+            commands.spawn(AudioBundle {
+                source: asset_server.load("test.flac"),
+                ..default()
+            });
+        } else {
+            for item in query.iter() {
+                if item.is_paused() {
+                    item.play()
+                } else {
+                    item.pause()
+                }
+            }
+        }
+    }
 }

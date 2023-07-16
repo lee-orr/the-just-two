@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
 
 fn main() {
     App::new()
@@ -18,43 +18,40 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
-    commands.spawn(Camera2dBundle::default());
-
-    // Circle
-    commands.spawn(MaterialMesh2dBundle {
-        mesh: meshes.add(shape::Circle::new(50.).into()).into(),
-        material: materials.add(ColorMaterial::from(Color::PURPLE)),
-        transform: Transform::from_translation(Vec3::new(-150., 0., 0.)),
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_translation(Vec3::new(-2., 5., -5.))
+            .looking_at(Vec3::Y, Vec3::Y),
         ..default()
     });
 
-    // Rectangle
-    commands.spawn(SpriteBundle {
-        sprite: Sprite {
-            color: Color::rgb(0.25, 0.25, 0.75),
-            custom_size: Some(Vec2::new(50.0, 100.0)),
+    commands.spawn(SceneBundle {
+        scene: asset_server.load("base-models.gltf#Scene0"),
+
+        ..default()
+    });
+
+    commands.spawn(SceneBundle {
+        scene: asset_server.load("ground.gltf#Scene0"),
+
+        ..default()
+    });
+
+    commands.insert_resource(AmbientLight {
+        color: Color::ORANGE_RED,
+        brightness: 0.02,
+    });
+
+    commands.spawn(PointLightBundle {
+        // transform: Transform::from_xyz(5.0, 8.0, 2.0),
+        transform: Transform::from_xyz(1.0, 10.0, -3.0),
+        point_light: PointLight {
+            intensity: 1600.0, // lumens - roughly a 100W non-halogen incandescent bulb
+            color: Color::RED,
+            shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_translation(Vec3::new(-50., 0., 0.)),
-        ..default()
-    });
-
-    // Quad
-    commands.spawn(MaterialMesh2dBundle {
-        mesh: meshes
-            .add(shape::Quad::new(Vec2::new(50., 100.)).into())
-            .into(),
-        material: materials.add(ColorMaterial::from(Color::LIME_GREEN)),
-        transform: Transform::from_translation(Vec3::new(50., 0., 0.)),
-        ..default()
-    });
-
-    // Hexagon
-    commands.spawn(MaterialMesh2dBundle {
-        mesh: meshes.add(shape::RegularPolygon::new(50., 6).into()).into(),
-        material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
-        transform: Transform::from_translation(Vec3::new(150., 0., 0.)),
         ..default()
     });
 }

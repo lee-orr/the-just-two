@@ -6,23 +6,16 @@ use bevy::{
 
 pub type ToonMaterialPlugin = MaterialPlugin<ToonMaterial>;
 
-#[derive(Debug, Clone, ShaderType)]
-pub struct ToonValues {
-    pub threshold: f32,
-    pub shadow_multiplier: f32,
-}
-
-// impl ShaderType for ToonValues {}
-
 #[derive(AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
 #[uuid = "dfaf271e-ec36-4fdd-a17d-0c0c79964926"]
 pub struct ToonMaterial {
-    #[uniform(0)]
-    pub values: ToonValues,
-
-    #[texture(1)]
-    #[sampler(2)]
+    #[texture(0)]
+    #[sampler(1)]
     pub color_texture: Option<Handle<Image>>,
+
+    #[texture(2)]
+    #[sampler(3)]
+    pub shadow_texture: Option<Handle<Image>>,
 }
 
 impl Material for ToonMaterial {

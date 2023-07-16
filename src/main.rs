@@ -3,7 +3,7 @@ mod toon_material;
 use std::time::Duration;
 
 use bevy::{asset::ChangeWatcher, prelude::*};
-use toon_material::{ToonMaterial, ToonMaterialPlugin, ToonValues};
+use toon_material::{ToonMaterial, ToonMaterialPlugin};
 
 fn main() {
     App::new()
@@ -19,7 +19,8 @@ fn main() {
                 .set(AssetPlugin {
                     watch_for_changes: ChangeWatcher::with_delay(Duration::from_secs_f32(0.5)),
                     ..Default::default()
-                }),
+                })
+                .set(ImagePlugin::default_nearest()),
             ToonMaterialPlugin::default(),
         ))
         .add_systems(Startup, setup)
@@ -71,11 +72,8 @@ fn setup(
     });
 
     commands.insert_resource(BaseMaterial(materials.add(ToonMaterial {
-        values: ToonValues {
-            threshold: 0.5,
-            shadow_multiplier: 0.8,
-        },
         color_texture: Some(asset_server.load("color-pallet.png")),
+        shadow_texture: Some(asset_server.load("shadow-gradient.png")),
     })));
 }
 

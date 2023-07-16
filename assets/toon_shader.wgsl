@@ -4,18 +4,14 @@
 #import bevy_core_pipeline::tonemapping tone_mapping
 #import bevy_pbr::pbr_functions as fns
 
-struct CustomMaterial {
-    threshold: f32,
-    shadow_multiplier: f32,
-};
-
-
 @group(1) @binding(0)
-var<uniform> material: CustomMaterial;
-@group(1) @binding(1)
 var base_color_texture: texture_2d<f32>;
-@group(1) @binding(2)
+@group(1) @binding(1)
 var base_color_sampler: sampler;
+@group(1) @binding(2)
+var shadow_color_texture: texture_2d<f32>;
+@group(1) @binding(3)
+var shadow_color_sampler: sampler;
 
 @fragment
 fn fragment(
@@ -55,8 +51,7 @@ fn fragment(
 
     let color =  textureSample(base_color_texture, base_color_sampler, mesh.uv);
 
-    if (result > material.threshold) {
-        return color;
-    }
-    return color * material.shadow_multiplier;
+    let shadow = textureSample(shadow_color_texture, shadow_color_sampler, vec2<f32>(result, 0.5));
+
+    return color * shadow;
 }

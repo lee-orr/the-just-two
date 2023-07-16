@@ -1,23 +1,38 @@
-use bevy::prelude::*;
+mod toon_material;
+
+use std::time::Duration;
+
+use bevy::{asset::ChangeWatcher, prelude::*};
+use toon_material::{ToonMaterial, ToonMaterialPlugin, ToonValues};
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                fit_canvas_to_parent: true,
-                ..default()
-            }),
-            ..default()
-        }))
+        .add_plugins((
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        fit_canvas_to_parent: true,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .set(AssetPlugin {
+                    watch_for_changes: ChangeWatcher::with_delay(Duration::from_secs_f32(0.5)),
+                    ..Default::default()
+                }),
+            ToonMaterialPlugin::default(),
+        ))
         .add_systems(Startup, setup)
-        .add_systems(Update, spawn_audio)
+        .add_systems(Update, (spawn_audio, set_material))
         .run();
 }
 
+#[derive(Resource)]
+struct BaseMaterial(Handle<ToonMaterial>);
+
 fn setup(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut materials: ResMut<Assets<ToonMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
     commands.spawn(Camera3dBundle {
@@ -48,12 +63,37 @@ fn setup(
         transform: Transform::from_xyz(1.0, 10.0, -3.0),
         point_light: PointLight {
             intensity: 1600.0, // lumens - roughly a 100W non-halogen incandescent bulb
-            color: Color::RED,
+            color: Color::WHITE,
             shadows_enabled: true,
             ..default()
         },
         ..default()
     });
+
+    commands.insert_resource(BaseMaterial(materials.add(ToonMaterial {
+        values: ToonValues {
+            threshold: 0.5,
+            shadow_multiplier: 0.8,
+        },
+        color_texture: Some(asset_server.load("color-pallet.png")),
+    })));
+}
+
+fn set_material(
+    mut commands: Commands,
+    query: Query<Entity, With<Handle<StandardMaterial>>>,
+    base: Option<Res<BaseMaterial>>,
+) {
+    let Some(base) = base else {
+        return;
+    };
+
+    for entity in query.iter() {
+        commands
+            .entity(entity)
+            .remove::<Handle<StandardMaterial>>()
+            .insert(base.0.clone());
+    }
 }
 
 fn spawn_audio(

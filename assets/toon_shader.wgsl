@@ -47,11 +47,24 @@ fn fragment(
     pbr_input.V = fns::calculate_view(mesh.world_position, pbr_input.is_orthographic);
 
 
-    let result = fns::pbr(pbr_input).x;
+    let result = fns::pbr(pbr_input);
+
+    let min = min(result.x, min(result.y, result.z));
+    let max = max(result.x, max(result.y, result.z));
+
+    let max_m_min = max - min;
+    let max_p_min = max + min;
+
+    let l = max_p_min / 2.0;
 
     let color =  textureSample(base_color_texture, base_color_sampler, mesh.uv);
 
-    let shadow = textureSample(shadow_color_texture, shadow_color_sampler, vec2<f32>(result, 0.5));
+    let shadow = textureSample(shadow_color_texture, shadow_color_sampler, vec2<f32>(l, 0.5));
 
-    return color * shadow;
+    let result_shadeless = clamp(result / l, vec4<f32>(0., 0., 0., 0.), vec4<f32>(1., 1., 1., 1.));
+
+    let shaded = color * shadow;
+    let shaded_with_hue = result_shadeless * shaded;   
+
+    return 1. - (1. - shaded) * (1. - shaded_with_hue);
 }

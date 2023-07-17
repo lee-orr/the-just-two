@@ -18,7 +18,7 @@ impl Plugin for MainMenuPlugin {
 }
 
 #[derive(Component)]
-struct MenuRoot;
+struct Screen;
 
 fn setup(
     mut commands: Commands,
@@ -48,10 +48,10 @@ fn setup(
             );
         });
     });
-    commands.entity(r).insert(MenuRoot);
+    commands.entity(r).insert(Screen);
 }
 
-fn exit(mut commands: Commands, query: Query<Entity, With<MenuRoot>>) {
+fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
     for item in query.iter() {
         commands.entity(item).despawn_recursive();
     }

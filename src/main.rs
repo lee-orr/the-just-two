@@ -1,5 +1,6 @@
 mod assets;
 mod credits;
+mod in_game;
 mod loading_state;
 mod menu;
 mod state;
@@ -14,6 +15,7 @@ use bevy::{asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig, p
 use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
 use bevy_vector_shapes::Shape2dPlugin;
 use credits::CreditsPlugin;
+use in_game::InGamePlugin;
 use loading_state::LoadingScreenPlugin;
 use menu::MainMenuPlugin;
 use state::AppState;
@@ -46,6 +48,7 @@ fn main() {
             LoadingScreenPlugin,
             MainMenuPlugin,
             CreditsPlugin,
+            InGamePlugin,
         ))
         .add_state::<AppState>()
         .add_loading_state(

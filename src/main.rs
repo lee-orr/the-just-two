@@ -15,7 +15,7 @@ use bevy_vector_shapes::Shape2dPlugin;
 use loading_state::LoadingScreenPlugin;
 use menu::MainMenuPlugin;
 use state::AppState;
-use toon_material::{BaseMaterial, ToonMaterial, ToonMaterialPlugin};
+use toon_material::{ToonMaterial, ToonMaterialPlugin};
 
 fn main() {
     #[cfg(target_arch = "wasm32")]
@@ -51,8 +51,8 @@ fn main() {
 
 fn setup(
     mut commands: Commands,
-    mut materials: ResMut<Assets<ToonMaterial>>,
-    asset_server: Res<AssetServer>,
+    _materials: ResMut<Assets<ToonMaterial>>,
+    _asset_server: Res<AssetServer>,
 ) {
     commands.spawn(Camera3dBundle {
         transform: Transform::from_translation(Vec3::new(-2., 5., -5.))

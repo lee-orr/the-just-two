@@ -4,7 +4,14 @@ use bevy::{
     render::render_resource::AsBindGroup,
 };
 
-pub type ToonMaterialPlugin = MaterialPlugin<ToonMaterial>;
+pub struct ToonMaterialPlugin;
+
+impl Plugin for ToonMaterialPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins(MaterialPlugin::<ToonMaterial>::default())
+            .add_systems(Update, set_material);
+    }
+}
 
 #[derive(AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
 #[uuid = "dfaf271e-ec36-4fdd-a17d-0c0c79964926"]
@@ -21,5 +28,25 @@ pub struct ToonMaterial {
 impl Material for ToonMaterial {
     fn fragment_shader() -> bevy::render::render_resource::ShaderRef {
         "toon_shader.wgsl".into()
+    }
+}
+
+#[derive(Resource)]
+pub struct BaseMaterial(pub Handle<ToonMaterial>);
+
+fn set_material(
+    mut commands: Commands,
+    query: Query<Entity, With<Handle<StandardMaterial>>>,
+    base: Option<Res<BaseMaterial>>,
+) {
+    let Some(base) = base else {
+        return;
+    };
+
+    for entity in query.iter() {
+        commands
+            .entity(entity)
+            .remove::<Handle<StandardMaterial>>()
+            .insert(base.0.clone());
     }
 }

@@ -1,7 +1,7 @@
 use bevy::{
     prelude::*,
     reflect::{TypePath, TypeUuid},
-    render::render_resource::{AsBindGroup, ShaderType},
+    render::render_resource::AsBindGroup,
 };
 
 pub type ToonMaterialPlugin = MaterialPlugin<ToonMaterial>;

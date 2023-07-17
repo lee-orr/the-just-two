@@ -1,4 +1,5 @@
 mod assets;
+mod credits;
 mod loading_state;
 mod menu;
 mod state;
@@ -12,6 +13,7 @@ use assets::MainGameAssets;
 use bevy::{asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig, prelude::*};
 use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
 use bevy_vector_shapes::Shape2dPlugin;
+use credits::CreditsPlugin;
 use loading_state::LoadingScreenPlugin;
 use menu::MainMenuPlugin;
 use state::AppState;
@@ -39,7 +41,12 @@ fn main() {
             Shape2dPlugin::default(),
         ))
         .insert_resource(ClearColor(ui_colors::SCREEN_BACKGROUND_COLOR))
-        .add_plugins((ToonMaterialPlugin, LoadingScreenPlugin, MainMenuPlugin))
+        .add_plugins((
+            ToonMaterialPlugin,
+            LoadingScreenPlugin,
+            MainMenuPlugin,
+            CreditsPlugin,
+        ))
         .add_state::<AppState>()
         .add_loading_state(
             LoadingState::new(AppState::LoadingMenu).continue_to_state(AppState::MainMenu),

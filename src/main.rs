@@ -1,11 +1,20 @@
+mod loading_state;
+mod state;
 mod toon_material;
+mod ui_colors;
 
 use std::time::Duration;
 
-use bevy::{asset::ChangeWatcher, prelude::*};
+use bevy::{asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig, prelude::*};
+use bevy_vector_shapes::Shape2dPlugin;
+use loading_state::LoadingScreenPlugin;
+use state::AppState;
 use toon_material::{ToonMaterial, ToonMaterialPlugin};
 
 fn main() {
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+
     App::new()
         .add_plugins((
             DefaultPlugins
@@ -21,8 +30,11 @@ fn main() {
                     ..Default::default()
                 })
                 .set(ImagePlugin::default_nearest()),
-            ToonMaterialPlugin::default(),
+            Shape2dPlugin::default(),
         ))
+        .insert_resource(ClearColor(ui_colors::BACKGROUND_COLOR))
+        .add_plugins((ToonMaterialPlugin::default(), LoadingScreenPlugin))
+        .add_state::<AppState>()
         .add_systems(Startup, setup)
         .add_systems(Update, (spawn_audio, set_material))
         .run();
@@ -39,6 +51,17 @@ fn setup(
     commands.spawn(Camera3dBundle {
         transform: Transform::from_translation(Vec3::new(-2., 5., -5.))
             .looking_at(Vec3::Y, Vec3::Y),
+        ..default()
+    });
+
+    commands.spawn(Camera2dBundle {
+        camera: Camera {
+            order: 1,
+            ..default()
+        },
+        camera_2d: Camera2d {
+            clear_color: ClearColorConfig::None,
+        },
         ..default()
     });
 

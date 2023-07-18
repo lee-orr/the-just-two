@@ -5,7 +5,7 @@ use crate::{
     app_state::AppState,
     assets::MainGameAssets,
     toon_material::{BaseMaterial, ToonMaterial},
-    ui_classes::*,
+    ui::classes::*,
 };
 pub struct MainMenuPlugin;
 

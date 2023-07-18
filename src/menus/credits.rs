@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_ui_dsl::*;
 
 use crate::{
-    app_state::AppState, assets::MainGameAssets, toon_material::ToonMaterial, ui_classes::*,
+    app_state::AppState, assets::MainGameAssets, toon_material::ToonMaterial, ui::classes::*,
 };
 pub struct CreditsPlugin;
 

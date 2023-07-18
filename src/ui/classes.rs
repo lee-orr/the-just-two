@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_dsl::{AssetClass, Class};
 
-use crate::ui_colors::*;
+use super::colors::*;
 
 pub trait IntermediaryNodeBundleHandler {
     fn style(&mut self) -> &mut Style;

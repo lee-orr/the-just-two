@@ -3,8 +3,7 @@ mod assets;
 mod in_game;
 mod menus;
 mod toon_material;
-mod ui_classes;
-mod ui_colors;
+mod ui;
 
 use std::time::Duration;
 
@@ -41,7 +40,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             Shape2dPlugin::default(),
         ))
-        .insert_resource(ClearColor(ui_colors::SCREEN_BACKGROUND_COLOR))
+        .insert_resource(ClearColor(ui::colors::SCREEN_BACKGROUND_COLOR))
         .add_plugins((
             ToonMaterialPlugin,
             LoadingScreenPlugin,

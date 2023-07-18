@@ -3,7 +3,7 @@ use std::ops::Mul;
 use bevy::prelude::*;
 use bevy_vector_shapes::{prelude::ShapePainter, shapes::DiscPainter};
 
-use crate::{app_state::AppState, ui_colors};
+use crate::{app_state::AppState, ui::colors};
 
 pub struct LoadingScreenPlugin;
 
@@ -36,7 +36,7 @@ fn draw_loading(mut painter: ShapePainter, time: Res<Time>) {
         );
 
         painter.set_translation(location);
-        painter.color = ui_colors::PRIMARY_COLOR;
+        painter.color = colors::PRIMARY_COLOR;
         painter.circle(CIRCLE_SIZE);
     }
 }

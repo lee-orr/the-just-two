@@ -65,5 +65,7 @@ fn process_input(
             PauseState::None => PauseState::Paused,
             PauseState::Paused => PauseState::None,
         })));
+    } else if keys.just_pressed(KeyCode::X) && paused.get() == &PauseState::Paused {
+        commands.insert_resource(NextState(Some(AppState::MainMenu)));
     }
 }

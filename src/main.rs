@@ -1,9 +1,7 @@
 mod app_state;
 mod assets;
-mod credits;
 mod in_game;
-mod loading_state;
-mod menu;
+mod menus;
 mod toon_material;
 mod ui_classes;
 mod ui_colors;
@@ -19,6 +17,7 @@ use credits::CreditsPlugin;
 use in_game::InGamePlugin;
 use loading_state::LoadingScreenPlugin;
 use menu::MainMenuPlugin;
+use menus::{credits, loading_state, menu};
 use toon_material::{ToonMaterial, ToonMaterialPlugin};
 
 fn main() {

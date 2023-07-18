@@ -15,13 +15,9 @@ impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(PausePlugin)
             .add_state::<GameState>()
-            .add_state::<PauseState>()
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(OnExit(AppState::InGame), (exit, clear_audio))
-            .add_systems(
-                Update,
-                (process_input, enable_audio).run_if(in_state(AppState::InGame)),
-            );
+            .add_systems(Update, (enable_audio).run_if(in_state(AppState::InGame)));
     }
 }
 
@@ -80,19 +76,6 @@ fn exit(mut commands: Commands, query: Query<Entity, With<InGame>>) {
 fn clear_audio(audio: Query<&AudioSink>) {
     for audio in audio.iter() {
         audio.stop();
-    }
-}
-
-fn process_input(
-    mut commands: Commands,
-    keys: Res<Input<KeyCode>>,
-    paused: Res<State<PauseState>>,
-) {
-    if keys.just_pressed(KeyCode::Escape) {
-        commands.insert_resource(NextState(Some(match paused.get() {
-            PauseState::None => PauseState::Paused,
-            PauseState::Paused => PauseState::None,
-        })));
     }
 }
 

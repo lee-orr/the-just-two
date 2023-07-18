@@ -10,9 +10,10 @@ pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(PauseState::Paused), setup)
+        app.add_state::<PauseState>()
+            .add_systems(OnEnter(PauseState::Paused), setup)
             .add_systems(OnExit(PauseState::Paused), exit)
-            .add_systems(Update, process_input.run_if(in_state(PauseState::Paused)));
+            .add_systems(Update, process_input.run_if(in_state(AppState::InGame)));
     }
 }
 
@@ -54,8 +55,15 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
     }
 }
 
-fn process_input(mut commands: Commands, keys: Res<Input<KeyCode>>) {
-    if keys.just_pressed(KeyCode::X) {
-        commands.insert_resource(NextState(Some(AppState::MainMenu)));
+fn process_input(
+    mut commands: Commands,
+    keys: Res<Input<KeyCode>>,
+    paused: Res<State<PauseState>>,
+) {
+    if keys.just_pressed(KeyCode::Escape) {
+        commands.insert_resource(NextState(Some(match paused.get() {
+            PauseState::None => PauseState::Paused,
+            PauseState::Paused => PauseState::None,
+        })));
     }
 }

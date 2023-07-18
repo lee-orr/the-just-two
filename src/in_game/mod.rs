@@ -1,4 +1,5 @@
 mod encounter;
+mod factions;
 mod game_state;
 mod pause_screen;
 

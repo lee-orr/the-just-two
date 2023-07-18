@@ -9,8 +9,12 @@ use std::time::Duration;
 
 use app_state::AppState;
 use assets::MainGameAssets;
-use bevy::{asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig, prelude::*};
+use bevy::{
+    asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig,
+    input::common_conditions::input_toggle_active, prelude::*,
+};
 use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_vector_shapes::Shape2dPlugin;
 use credits::CreditsPlugin;
 use in_game::InGamePlugin;
@@ -47,6 +51,7 @@ fn main() {
             MainMenuPlugin,
             CreditsPlugin,
             InGamePlugin,
+            WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::F1)),
         ))
         .add_state::<AppState>()
         .add_loading_state(

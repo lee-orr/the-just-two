@@ -1,3 +1,4 @@
+mod encounter;
 mod game_state;
 mod pause_screen;
 

@@ -27,7 +27,7 @@ pub struct ToonMaterial {
 
 impl Material for ToonMaterial {
     fn fragment_shader() -> bevy::render::render_resource::ShaderRef {
-        "toon_shader.wgsl".into()
+        "shaders/toon_shader.wgsl".into()
     }
 }
 

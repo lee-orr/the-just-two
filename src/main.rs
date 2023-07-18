@@ -2,6 +2,7 @@ mod app_state;
 mod assets;
 mod in_game;
 mod menus;
+mod scene_spawner;
 mod toon_material;
 mod ui;
 
@@ -21,7 +22,8 @@ use in_game::InGamePlugin;
 use loading_state::LoadingScreenPlugin;
 use menu::MainMenuPlugin;
 use menus::{credits, loading_state, menu};
-use toon_material::{ToonMaterial, ToonMaterialPlugin};
+use scene_spawner::SceneSpawnerPlugin;
+use toon_material::ToonMaterialPlugin;
 
 fn main() {
     #[cfg(target_arch = "wasm32")]
@@ -43,6 +45,7 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
             Shape2dPlugin::default(),
+            WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::F1)),
         ))
         .insert_resource(ClearColor(ui::colors::SCREEN_BACKGROUND_COLOR))
         .add_plugins((
@@ -51,10 +54,11 @@ fn main() {
             MainMenuPlugin,
             CreditsPlugin,
             InGamePlugin,
-            WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::F1)),
+            SceneSpawnerPlugin,
         ))
         .add_state::<AppState>()
         .register_type::<AppState>()
+        .register_type::<MainGameAssets>()
         .add_plugins(
             StateInspectorPlugin::<AppState>::default()
                 .run_if(input_toggle_active(false, KeyCode::F1)),
@@ -67,11 +71,7 @@ fn main() {
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    _materials: ResMut<Assets<ToonMaterial>>,
-    _asset_server: Res<AssetServer>,
-) {
+fn setup(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
         transform: Transform::from_translation(Vec3::new(-2., 5., -5.))
             .looking_at(Vec3::Y, Vec3::Y),

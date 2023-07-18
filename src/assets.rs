@@ -1,7 +1,9 @@
 use bevy::{prelude::*, scene::Scene};
 use bevy_asset_loader::prelude::AssetCollection;
+use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 
-#[derive(AssetCollection, Resource)]
+#[derive(AssetCollection, Resource, Default, Reflect, InspectorOptions)]
+#[reflect(Resource, InspectorOptions)]
 pub struct MainGameAssets {
     #[asset(path = "models/base-models.gltf#Scene0")]
     pub player_scene: Handle<Scene>,

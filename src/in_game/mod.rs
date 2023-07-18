@@ -6,7 +6,12 @@ mod pause_screen;
 use bevy::{input::common_conditions::input_toggle_active, prelude::*};
 use bevy_inspector_egui::quick::StateInspectorPlugin;
 
-use crate::{app_state::AppState, assets::MainGameAssets, toon_material::ToonMaterial};
+use crate::{
+    app_state::AppState,
+    assets::MainGameAssets,
+    scene_spawner::{MaterializedScene, MaterializedSceneBundle},
+    toon_material::BaseMaterial,
+};
 
 use self::{
     encounter::EncounterPlugin,
@@ -33,12 +38,7 @@ impl Plugin for InGamePlugin {
 #[derive(Component)]
 struct InGame;
 
-fn setup(
-    mut commands: Commands,
-    assets: Res<MainGameAssets>,
-    _asset_server: Res<AssetServer>,
-    _materials: ResMut<Assets<ToonMaterial>>,
-) {
+fn setup(mut commands: Commands, assets: Res<MainGameAssets>, base_material: Res<BaseMaterial>) {
     commands.insert_resource(NextState(Some(GameState::Encounter)));
     commands.insert_resource(AmbientLight {
         color: Color::ORANGE_RED,
@@ -52,12 +52,18 @@ fn setup(
             VisibilityBundle::default(),
         ))
         .with_children(|p| {
-            p.spawn(SceneBundle {
-                scene: assets.ground.clone(),
+            p.spawn(MaterializedSceneBundle {
+                spawner: MaterializedScene {
+                    scene: assets.ground.clone(),
+                    material: base_material.0.clone(),
+                },
                 ..Default::default()
             });
-            p.spawn(SceneBundle {
-                scene: assets.player_scene.clone(),
+            p.spawn(MaterializedSceneBundle {
+                spawner: MaterializedScene {
+                    scene: assets.player_scene.clone(),
+                    material: base_material.0.clone(),
+                },
                 ..Default::default()
             });
             p.spawn(PointLightBundle {

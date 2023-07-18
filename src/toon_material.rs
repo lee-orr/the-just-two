@@ -8,8 +8,7 @@ pub struct ToonMaterialPlugin;
 
 impl Plugin for ToonMaterialPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(MaterialPlugin::<ToonMaterial>::default())
-            .add_systems(Update, set_material);
+        app.add_plugins(MaterialPlugin::<ToonMaterial>::default());
     }
 }
 
@@ -33,20 +32,3 @@ impl Material for ToonMaterial {
 
 #[derive(Resource)]
 pub struct BaseMaterial(pub Handle<ToonMaterial>);
-
-fn set_material(
-    mut commands: Commands,
-    query: Query<Entity, With<Handle<StandardMaterial>>>,
-    base: Option<Res<BaseMaterial>>,
-) {
-    let Some(base) = base else {
-        return;
-    };
-
-    for entity in query.iter() {
-        commands
-            .entity(entity)
-            .remove::<Handle<StandardMaterial>>()
-            .insert(base.0.clone());
-    }
-}

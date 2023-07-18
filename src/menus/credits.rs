@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_dsl::*;
 
-use crate::{
-    app_state::AppState, assets::MainGameAssets, toon_material::ToonMaterial, ui::classes::*,
-};
+use crate::{app_state::AppState, ui::classes::*};
 pub struct CreditsPlugin;
 
 impl Plugin for CreditsPlugin {
@@ -17,12 +15,7 @@ impl Plugin for CreditsPlugin {
 #[derive(Component)]
 struct Screen;
 
-fn setup(
-    mut commands: Commands,
-    _assets: Res<MainGameAssets>,
-    asset_server: Res<AssetServer>,
-    _materials: ResMut<Assets<ToonMaterial>>,
-) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(AmbientLight {
         color: Color::ORANGE_RED,
         brightness: 0.02,

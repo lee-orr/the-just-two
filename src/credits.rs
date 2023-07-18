@@ -1,12 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_dsl::*;
 
-use crate::{
-    assets::MainGameAssets,
-    state::AppState,
-    toon_material::{BaseMaterial, ToonMaterial},
-    ui_classes::*,
-};
+use crate::{assets::MainGameAssets, state::AppState, toon_material::ToonMaterial, ui_classes::*};
 pub struct CreditsPlugin;
 
 impl Plugin for CreditsPlugin {
@@ -22,15 +17,10 @@ struct Screen;
 
 fn setup(
     mut commands: Commands,
-    assets: Res<MainGameAssets>,
+    _assets: Res<MainGameAssets>,
     asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ToonMaterial>>,
+    _materials: ResMut<Assets<ToonMaterial>>,
 ) {
-    commands.insert_resource(BaseMaterial(materials.add(ToonMaterial {
-        color_texture: Some(assets.base_colors.clone()),
-        shadow_texture: Some(assets.shadow_gradient.clone()),
-    })));
-
     commands.insert_resource(AmbientLight {
         color: Color::ORANGE_RED,
         brightness: 0.02,
@@ -38,17 +28,32 @@ fn setup(
 
     let r = root(c_root, &asset_server, &mut commands, |p| {
         node(primary_box, p, |p| {
-            text("The Just Two", primary_box_main, main_text, p);
-            text("by Lee-Orr", primary_box_item, standard_text, p);
+            node((span.nb(), primary_box_main.nb()), p, |p| {
+                text("The Just", (), (main_text, knight_text), p);
+                text("Two", (), (main_text, druid_text), p);
+            });
+            text("by Lee-Orr", primary_box_item.nb(), standard_text, p);
             text(
-                "built using the Bevy Game Engine",
-                primary_box_item,
+                "Built using the Bevy Game Engine",
+                primary_box_item.nb(),
+                standard_text,
+                p,
+            );
+            text(
+                "Fonts by Appostrophic Labs, sourced from 1001freefonts.com",
+                primary_box_item.nb(),
+                standard_text,
+                p,
+            );
+            text(
+                "All other artistic assets created by Lee-Orr",
+                primary_box_item.nb(),
                 standard_text,
                 p,
             );
             text(
                 "Press Enter for the Main Menu",
-                primary_box_item,
+                primary_box_item.nb(),
                 standard_text,
                 p,
             );

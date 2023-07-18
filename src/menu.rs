@@ -38,11 +38,19 @@ fn setup(
 
     let r = root(c_root, &asset_server, &mut commands, |p| {
         node(primary_box, p, |p| {
-            text("The Just Two", primary_box_main, main_text, p);
-            text("Press ENTER to start", primary_box_item, standard_text, p);
+            node((span.nb(), primary_box_main.nb(), centered.nb()), p, |p| {
+                text("The Just", (), (main_text, knight_text), p);
+                text("Two", (), (main_text, druid_text), p);
+            });
+            text(
+                "Press ENTER to start",
+                primary_box_item.nb(),
+                standard_text,
+                p,
+            );
             text(
                 "Press C for the credits",
-                primary_box_item,
+                primary_box_item.nb(),
                 standard_text,
                 p,
             );

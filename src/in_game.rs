@@ -1,17 +1,16 @@
 use bevy::prelude::*;
 
-use crate::{
-    assets::MainGameAssets,
-    state::AppState,
-    toon_material::{BaseMaterial, ToonMaterial},
-};
+use crate::{assets::MainGameAssets, state::AppState, toon_material::ToonMaterial};
 pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), setup)
-            .add_systems(OnExit(AppState::InGame), exit)
-            .add_systems(Update, process_input.run_if(in_state(AppState::InGame)));
+            .add_systems(OnExit(AppState::InGame), (exit, clear_audio))
+            .add_systems(
+                Update,
+                (process_input, enable_audio).run_if(in_state(AppState::InGame)),
+            );
     }
 }
 
@@ -22,13 +21,8 @@ fn setup(
     mut commands: Commands,
     assets: Res<MainGameAssets>,
     _asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ToonMaterial>>,
+    _materials: ResMut<Assets<ToonMaterial>>,
 ) {
-    commands.insert_resource(BaseMaterial(materials.add(ToonMaterial {
-        color_texture: Some(assets.base_colors.clone()),
-        shadow_texture: Some(assets.shadow_gradient.clone()),
-    })));
-
     commands.insert_resource(AmbientLight {
         color: Color::ORANGE_RED,
         brightness: 0.02,
@@ -55,7 +49,10 @@ fn setup(
             });
             p.spawn(AudioBundle {
                 source: assets.menu_music.clone(),
-                ..Default::default()
+                settings: PlaybackSettings {
+                    paused: true,
+                    ..Default::default()
+                },
             });
         });
 }
@@ -66,8 +63,22 @@ fn exit(mut commands: Commands, query: Query<Entity, With<InGame>>) {
     }
 }
 
+fn clear_audio(audio: Query<&AudioSink>) {
+    for audio in audio.iter() {
+        audio.stop();
+    }
+}
+
 fn process_input(mut commands: Commands, keys: Res<Input<KeyCode>>) {
     if keys.just_pressed(KeyCode::Escape) {
         commands.insert_resource(NextState(Some(AppState::MainMenu)));
+    }
+}
+
+fn enable_audio(audio: Query<&AudioSink>) {
+    for audio in audio.iter() {
+        if audio.is_paused() {
+            audio.play();
+        }
     }
 }

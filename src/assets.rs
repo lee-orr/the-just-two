@@ -13,4 +13,10 @@ pub struct MainGameAssets {
     pub shadow_gradient: Handle<Image>,
     #[asset(path = "test.flac")]
     pub menu_music: Handle<AudioSource>,
+    #[asset(path = "fonts/ENDOR___.ttf")]
+    pub knights_font: Handle<Font>,
+    #[asset(path = "fonts/IMMORTAL.ttf")]
+    pub druids_font: Handle<Font>,
+    #[asset(path = "fonts/AMERSN__.ttf")]
+    pub default_font: Handle<Font>,
 }

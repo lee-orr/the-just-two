@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use crate::{
     assets::MainGameAssets,
     materialized_scene::{MaterializedScene, MaterializedSceneBundle, MaterializedSceneReference},
@@ -6,7 +8,7 @@ use crate::{
 
 use super::{EncounterSetup, EncounterState};
 use bevy::{
-    gltf::Gltf,
+    gltf::{Gltf, GltfNode},
     prelude::*,
     utils::{HashMap, HashSet},
 };
@@ -79,6 +81,9 @@ pub fn setup_encounter_assets(setup: &EncounterSetup, dynamic: &mut DynamicAsset
     if let Some(loc) = &setup.location {
         scene_refs.push(loc.scene.clone());
     }
+    if let Some(p) = &setup.player {
+        scene_refs.push(p.scene.clone());
+    }
 
     let scenes = scene_refs
         .iter()
@@ -106,15 +111,26 @@ pub fn setup_encounter_assets(setup: &EncounterSetup, dynamic: &mut DynamicAsset
     );
 }
 
-pub struct SceneBundler<'a>(&'a EncounterAssets, &'a Materials, &'a Assets<Gltf>);
+pub struct SceneBundler<'a>(
+    &'a EncounterAssets,
+    &'a Materials,
+    &'a Assets<Gltf>,
+    &'a Assets<GltfNode>,
+);
 
 impl<'a> SceneBundler<'a> {
-    pub fn new(assets: &'a EncounterAssets, mats: &'a Materials, gltf: &'a Assets<Gltf>) -> Self {
+    pub fn new(
+        assets: &'a EncounterAssets,
+        mats: &'a Materials,
+        gltf: &'a Assets<Gltf>,
+        gltf_node: &'a Assets<GltfNode>,
+    ) -> Self {
         info!("Setting up bundler");
         info!("Assets: {assets:?}");
         info!("Materials: {mats:?}");
-        Self(assets, mats, gltf)
+        Self(assets, mats, gltf, gltf_node)
     }
+
     pub fn scene(&self, reference: &MaterializedSceneReference) -> Option<MaterializedSceneBundle> {
         info!("Getting Scene Reference {reference:?}");
         let gltf = self.0.scenes.get(&reference.gltf)?;
@@ -137,5 +153,57 @@ impl<'a> SceneBundler<'a> {
             },
             ..Default::default()
         })
+    }
+
+    pub fn camera_position(&self, reference: &MaterializedSceneReference) -> Option<Transform> {
+        info!("Getting Canera Reference {reference:?}");
+        let gltf = self.0.scenes.get(&reference.gltf)?;
+        info!("Got GLTF Handle");
+        let gltf = self.2.get(gltf)?;
+
+        info!("got gltf");
+        let camera_node = gltf
+            .named_nodes
+            .get(&format!("{}:camera", reference.scene))?;
+        info!("found camera node");
+        let camera_node = self.3.get(camera_node)?;
+        info!("got camera transform");
+        let mut transform = camera_node.transform;
+        transform.rotate_local_x(-1. * PI / 2.);
+        Some(transform)
+    }
+
+    pub fn player_position(&self, reference: &MaterializedSceneReference) -> Option<Transform> {
+        info!("Getting Player Reference {reference:?}");
+        let gltf = self.0.scenes.get(&reference.gltf)?;
+        info!("Got GLTF Handle");
+        let gltf = self.2.get(gltf)?;
+
+        info!("got gltf");
+        let player_node = gltf.named_nodes.get(&format!("{}:p", reference.scene))?;
+        info!("found player node");
+        let player_node = self.3.get(player_node)?;
+        info!("got player transform");
+        Some(player_node.transform)
+    }
+
+    pub fn challenger_position(
+        &self,
+        reference: &MaterializedSceneReference,
+        id: usize,
+    ) -> Option<Transform> {
+        info!("Getting Challenger {id} Reference {reference:?}");
+        let gltf = self.0.scenes.get(&reference.gltf)?;
+        info!("Got GLTF Handle");
+        let gltf = self.2.get(gltf)?;
+
+        info!("got gltf");
+        let challenger_node = gltf
+            .named_nodes
+            .get(&format!("{}:ch{id}", reference.scene))?;
+        info!("found challenger node");
+        let challenger_node = self.3.get(challenger_node)?;
+        info!("got challenger transform");
+        Some(challenger_node.transform)
     }
 }

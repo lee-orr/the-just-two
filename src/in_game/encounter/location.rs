@@ -31,6 +31,7 @@ impl Locations {
 pub struct LocationReference {
     pub name: String,
     pub scene: MaterializedSceneReference,
+    pub challenger_slots: usize,
 }
 
 #[derive(Reflect, InspectorOptions)]

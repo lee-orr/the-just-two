@@ -3,13 +3,17 @@ mod encounter_assets;
 mod introduction;
 mod location;
 
-use bevy::{gltf::Gltf, input::common_conditions::input_toggle_active, prelude::*};
+use bevy::{
+    gltf::{Gltf, GltfNode},
+    input::common_conditions::input_toggle_active,
+    prelude::*,
+};
 use bevy_asset_loader::prelude::DynamicAssets;
 use bevy_inspector_egui::{
     prelude::ReflectInspectorOptions, quick::StateInspectorPlugin, InspectorOptions,
 };
 
-use crate::assets::MainGameAssets;
+use crate::{assets::MainGameAssets, materialized_scene::MaterializedSceneBundle};
 
 use self::{
     challenger::{ChallengerPlugin, ChallengerReference},
@@ -81,6 +85,7 @@ pub struct EncounterSetup {
     pub title: Option<String>,
     pub introduction: Option<String>,
     pub player_faction: Faction,
+    pub player: Option<ChallengerReference>,
     pub challengers: Vec<(usize, ChallengerReference)>,
     pub location: Option<LocationReference>,
 }
@@ -93,6 +98,7 @@ impl Default for EncounterSetup {
             player_faction: Faction::Knights,
             challengers: vec![],
             location: None,
+            player: None,
         }
     }
 }
@@ -110,9 +116,10 @@ fn generate_encounter(
         return;
     };
     commands.insert_resource(EncounterSetup {
-        location: locations.get("grass").cloned(),
+        location: locations.get("sand").cloned(),
+        player: challengers.get("player_knight").cloned(),
         challengers: match challengers.get("monster") {
-            Some(c) => vec![(1, c.clone())],
+            Some(c) => vec![(3, c.clone())],
             None => vec![],
         },
         ..Default::default()
@@ -135,27 +142,72 @@ fn spawn_encounter(
     assets: Res<EncounterAssets>,
     materials: Res<Materials>,
     gltf: Res<Assets<Gltf>>,
+    gltf_node: Res<Assets<GltfNode>>,
+    camera: Query<Entity, With<Camera3d>>,
 ) {
-    let bundler = SceneBundler::new(&assets, &materials, &gltf);
-    if let Some(location) = &setup.location {
+    let bundler = SceneBundler::new(&assets, &materials, &gltf, &gltf_node);
+    if let (Some(location), Some(player)) = (&setup.location, &setup.player) {
         info!("Spawning Location {location:?}");
         if let Some(bundle) = bundler.scene(&location.scene) {
             commands.spawn((bundle, EncounterEntity));
         } else {
             error!("Couldn't setup bundle");
         }
-    }
+        if let Some(transform) = bundler.camera_position(&location.scene) {
+            for camera in camera.iter() {
+                commands.entity(camera).insert(transform);
+            }
+        }
 
-    for (count, challenger) in setup.challengers.iter() {
-        if let Some(bundle) = bundler.scene(&challenger.scene) {
-            for _ in 0..*count {
-                commands.spawn((bundle.clone(), EncounterEntity));
+        if let (Some(transform), Some(bundle)) = (
+            bundler.player_position(&location.scene),
+            bundler.scene(&player.scene),
+        ) {
+            let bundle = MaterializedSceneBundle {
+                transform: TransformBundle {
+                    local: transform,
+                    global: GlobalTransform::default(),
+                },
+                ..bundle.clone()
+            };
+            commands.spawn((bundle, EncounterEntity));
+        }
+
+        let mut challenger_id = 0usize;
+        let challenger_slots = location.challenger_slots;
+
+        for (count, challenger) in setup.challengers.iter() {
+            if challenger_id >= challenger_slots {
+                break;
+            }
+            if let Some(bundle) = bundler.scene(&challenger.scene) {
+                for _ in 0..*count {
+                    if challenger_id >= challenger_slots {
+                        break;
+                    }
+                    let Some(transform) =
+                        bundler.challenger_position(&location.scene, challenger_id)
+                    else {
+                        break;
+                    };
+
+                    let bundle = MaterializedSceneBundle {
+                        transform: TransformBundle {
+                            local: transform,
+                            global: GlobalTransform::default(),
+                        },
+                        ..bundle.clone()
+                    };
+                    commands.spawn((bundle, EncounterEntity));
+                    challenger_id += 1;
+                }
             }
         }
     }
 }
 
 fn despawn_encounter(mut commands: Commands, query: Query<Entity, With<EncounterEntity>>) {
+    commands.remove_resource::<EncounterSetup>();
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }

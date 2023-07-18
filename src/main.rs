@@ -14,7 +14,7 @@ use bevy::{
     input::common_conditions::input_toggle_active, prelude::*,
 };
 use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_inspector_egui::quick::{StateInspectorPlugin, WorldInspectorPlugin};
 use bevy_vector_shapes::Shape2dPlugin;
 use credits::CreditsPlugin;
 use in_game::InGamePlugin;
@@ -54,6 +54,11 @@ fn main() {
             WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::F1)),
         ))
         .add_state::<AppState>()
+        .register_type::<AppState>()
+        .add_plugins(
+            StateInspectorPlugin::<AppState>::default()
+                .run_if(input_toggle_active(false, KeyCode::F1)),
+        )
         .add_loading_state(
             LoadingState::new(AppState::LoadingMenu).continue_to_state(AppState::MainMenu),
         )

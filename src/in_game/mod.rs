@@ -2,11 +2,13 @@ mod encounter;
 mod game_state;
 mod pause_screen;
 
-use bevy::prelude::*;
+use bevy::{input::common_conditions::input_toggle_active, prelude::*};
+use bevy_inspector_egui::quick::StateInspectorPlugin;
 
 use crate::{app_state::AppState, assets::MainGameAssets, toon_material::ToonMaterial};
 
 use self::{
+    encounter::EncounterPlugin,
     game_state::{GameState, PauseState},
     pause_screen::PausePlugin,
 };
@@ -14,8 +16,13 @@ pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(PausePlugin)
+        app.add_plugins((PausePlugin, EncounterPlugin))
             .add_state::<GameState>()
+            .register_type::<GameState>()
+            .add_plugins(
+                StateInspectorPlugin::<GameState>::default()
+                    .run_if(input_toggle_active(false, KeyCode::F1)),
+            )
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(OnExit(AppState::InGame), (exit, clear_audio))
             .add_systems(Update, (enable_audio).run_if(in_state(AppState::InGame)));

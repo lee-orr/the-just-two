@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::{input::common_conditions::input_toggle_active, prelude::*};
+use bevy_inspector_egui::quick::StateInspectorPlugin;
 use bevy_ui_dsl::*;
 
 use crate::{
@@ -11,6 +12,11 @@ pub struct PausePlugin;
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<PauseState>()
+            .register_type::<PauseState>()
+            .add_plugins(
+                StateInspectorPlugin::<PauseState>::default()
+                    .run_if(input_toggle_active(false, KeyCode::F1)),
+            )
             .add_systems(OnEnter(PauseState::Paused), setup)
             .add_systems(OnExit(PauseState::Paused), exit)
             .add_systems(Update, process_input.run_if(in_state(AppState::InGame)));

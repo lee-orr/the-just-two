@@ -8,9 +8,8 @@ use bevy_inspector_egui::quick::StateInspectorPlugin;
 
 use crate::{
     app_state::AppState,
-    assets::MainGameAssets,
+    assets::{MainGameAssets, Materials},
     scene_spawner::{MaterializedScene, MaterializedSceneBundle},
-    toon_material::BaseMaterial,
 };
 
 use self::{
@@ -38,7 +37,7 @@ impl Plugin for InGamePlugin {
 #[derive(Component)]
 struct InGame;
 
-fn setup(mut commands: Commands, assets: Res<MainGameAssets>, base_material: Res<BaseMaterial>) {
+fn setup(mut commands: Commands, assets: Res<MainGameAssets>, materials: Res<Materials>) {
     commands.insert_resource(NextState(Some(GameState::Encounter)));
     commands.insert_resource(AmbientLight {
         color: Color::ORANGE_RED,
@@ -55,14 +54,14 @@ fn setup(mut commands: Commands, assets: Res<MainGameAssets>, base_material: Res
             p.spawn(MaterializedSceneBundle {
                 spawner: MaterializedScene {
                     scene: assets.ground.clone(),
-                    material: base_material.0.clone(),
+                    material: materials.base_material.clone(),
                 },
                 ..Default::default()
             });
             p.spawn(MaterializedSceneBundle {
                 spawner: MaterializedScene {
                     scene: assets.player_scene.clone(),
-                    material: base_material.0.clone(),
+                    material: materials.base_material.clone(),
                 },
                 ..Default::default()
             });

@@ -29,6 +29,3 @@ impl Material for ToonMaterial {
         "shaders/toon_shader.wgsl".into()
     }
 }
-
-#[derive(Resource)]
-pub struct BaseMaterial(pub Handle<ToonMaterial>);

@@ -1,12 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_dsl::*;
 
-use crate::{
-    app_state::AppState,
-    assets::MainGameAssets,
-    toon_material::{BaseMaterial, ToonMaterial},
-    ui::classes::*,
-};
+use crate::{app_state::AppState, assets::MainGameAssets, ui::classes::*};
 pub struct MainMenuPlugin;
 
 impl Plugin for MainMenuPlugin {
@@ -20,17 +15,7 @@ impl Plugin for MainMenuPlugin {
 #[derive(Component)]
 struct Screen;
 
-fn setup(
-    mut commands: Commands,
-    assets: Res<MainGameAssets>,
-    asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ToonMaterial>>,
-) {
-    commands.insert_resource(BaseMaterial(materials.add(ToonMaterial {
-        color_texture: Some(assets.base_colors.clone()),
-        shadow_texture: Some(assets.shadow_gradient.clone()),
-    })));
-
+fn setup(mut commands: Commands, _assets: Res<MainGameAssets>, asset_server: Res<AssetServer>) {
     commands.insert_resource(AmbientLight {
         color: Color::ORANGE_RED,
         brightness: 0.02,

@@ -9,12 +9,12 @@ mod ui;
 use std::time::Duration;
 
 use app_state::AppState;
-use assets::MainGameAssets;
+use assets::{MainGameAssetPlugin, MainGameAssets};
 use bevy::{
     asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig,
     input::common_conditions::input_toggle_active, prelude::*,
 };
-use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
+
 use bevy_inspector_egui::quick::{StateInspectorPlugin, WorldInspectorPlugin};
 use bevy_vector_shapes::Shape2dPlugin;
 use credits::CreditsPlugin;
@@ -55,6 +55,7 @@ fn main() {
             CreditsPlugin,
             InGamePlugin,
             SceneSpawnerPlugin,
+            MainGameAssetPlugin,
         ))
         .add_state::<AppState>()
         .register_type::<AppState>()
@@ -63,10 +64,6 @@ fn main() {
             StateInspectorPlugin::<AppState>::default()
                 .run_if(input_toggle_active(false, KeyCode::F1)),
         )
-        .add_loading_state(
-            LoadingState::new(AppState::LoadingMenu).continue_to_state(AppState::MainMenu),
-        )
-        .add_collection_to_loading_state::<_, MainGameAssets>(AppState::LoadingMenu)
         .add_systems(Startup, setup)
         .run();
 }

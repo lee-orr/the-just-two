@@ -1,8 +1,8 @@
 mod app_state;
 mod assets;
 mod in_game;
+mod materialized_scene;
 mod menus;
-mod scene_spawner;
 mod toon_material;
 mod ui;
 
@@ -20,9 +20,9 @@ use bevy_vector_shapes::Shape2dPlugin;
 use credits::CreditsPlugin;
 use in_game::InGamePlugin;
 use loading_state::LoadingScreenPlugin;
+use materialized_scene::SceneSpawnerPlugin;
 use menu::MainMenuPlugin;
 use menus::{credits, loading_state, menu};
-use scene_spawner::SceneSpawnerPlugin;
 use toon_material::ToonMaterialPlugin;
 
 fn main() {

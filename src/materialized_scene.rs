@@ -1,5 +1,6 @@
 use bevy::{ecs::query::Has, prelude::*};
 use bevy_inspector_egui::InspectorOptions;
+use serde::Deserialize;
 
 use crate::toon_material::ToonMaterial;
 
@@ -13,10 +14,17 @@ impl Plugin for SceneSpawnerPlugin {
     }
 }
 
-#[derive(Component, Reflect, InspectorOptions, Default)]
+#[derive(Component, Reflect, InspectorOptions, Default, Clone)]
 pub struct MaterializedScene {
     pub scene: Handle<Scene>,
     pub material: Handle<ToonMaterial>,
+}
+
+#[derive(Component, Reflect, Deserialize, Default, Clone, Debug)]
+pub struct MaterializedSceneReference {
+    pub gltf: String,
+    pub scene: String,
+    pub pallet: Vec<String>,
 }
 
 #[derive(Bundle, Default)]
@@ -24,6 +32,19 @@ pub struct MaterializedSceneBundle {
     pub spawner: MaterializedScene,
     pub transform: TransformBundle,
     pub visibility: VisibilityBundle,
+}
+
+impl Clone for MaterializedSceneBundle {
+    fn clone(&self) -> Self {
+        Self {
+            spawner: self.spawner.clone(),
+            transform: self.transform,
+            visibility: VisibilityBundle {
+                visibility: self.visibility.visibility,
+                computed: Default::default(),
+            },
+        }
+    }
 }
 
 fn spawn_scene(

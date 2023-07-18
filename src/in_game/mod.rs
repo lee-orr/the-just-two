@@ -6,17 +6,15 @@ mod pause_screen;
 use bevy::{input::common_conditions::input_toggle_active, prelude::*};
 use bevy_inspector_egui::quick::StateInspectorPlugin;
 
-use crate::{
-    app_state::AppState,
-    assets::{MainGameAssets, Materials},
-    scene_spawner::{MaterializedScene, MaterializedSceneBundle},
-};
+use crate::{app_state::AppState, assets::MainGameAssets};
 
 use self::{
-    encounter::EncounterPlugin,
+    encounter::{EncounterPlugin, EncounterState},
     game_state::{GameState, PauseState},
     pause_screen::PausePlugin,
 };
+
+pub use self::encounter::{Challengers, Locations};
 pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
@@ -37,7 +35,7 @@ impl Plugin for InGamePlugin {
 #[derive(Component)]
 struct InGame;
 
-fn setup(mut commands: Commands, assets: Res<MainGameAssets>, materials: Res<Materials>) {
+fn setup(mut commands: Commands, assets: Res<MainGameAssets>) {
     commands.insert_resource(NextState(Some(GameState::Encounter)));
     commands.insert_resource(AmbientLight {
         color: Color::ORANGE_RED,
@@ -51,24 +49,6 @@ fn setup(mut commands: Commands, assets: Res<MainGameAssets>, materials: Res<Mat
             VisibilityBundle::default(),
         ))
         .with_children(|p| {
-            p.spawn(MaterializedSceneBundle {
-                spawner: MaterializedScene {
-                    scene: assets.ground.clone(),
-                    material: materials.base_material.clone(),
-                },
-                ..Default::default()
-            });
-            p.spawn(MaterializedSceneBundle {
-                spawner: MaterializedScene {
-                    scene: assets.player_scene.clone(),
-                    material: materials.base_material.clone(),
-                },
-                ..Default::default()
-            });
-            p.spawn(PointLightBundle {
-                transform: Transform::from_translation(Vec3::new(3., 5., -2.)),
-                ..Default::default()
-            });
             p.spawn(AudioBundle {
                 source: assets.menu_music.clone(),
                 settings: PlaybackSettings {
@@ -82,6 +62,7 @@ fn setup(mut commands: Commands, assets: Res<MainGameAssets>, materials: Res<Mat
 fn exit(mut commands: Commands, query: Query<Entity, With<InGame>>) {
     commands.insert_resource(NextState(Some(GameState::None)));
     commands.insert_resource(NextState(Some(PauseState::None)));
+    commands.insert_resource(NextState(Some(EncounterState::None)));
     for item in query.iter() {
         commands.entity(item).despawn_recursive();
     }

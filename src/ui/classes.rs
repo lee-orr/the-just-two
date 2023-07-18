@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_dsl::{AssetClass, Class};
 
-use super::colors::*;
+use super::colors::{self, *};
 
 pub trait IntermediaryNodeBundleHandler {
     fn style(&mut self) -> &mut Style;
@@ -68,6 +68,10 @@ pub fn c_root(b: &mut NodeBundle) {
     b.style.display = Display::Flex;
     b.style.justify_content = JustifyContent::Center;
     b.style.align_items = AlignItems::Center;
+}
+
+pub fn opaque(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::SCREEN_BACKGROUND_COLOR;
 }
 
 pub fn primary_box(b: &mut NodeBundle) {

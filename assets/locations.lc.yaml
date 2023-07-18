@@ -1,0 +1,14 @@
+grass:
+  name: grass
+  scene:
+    gltf: "models/ground.gltf"
+    scene: "Scene"
+    pallet:
+      - "textures/color-pallet.png"
+lava:
+  name: lava
+  scene:
+    gltf: "models/ground.gltf"
+    scene: "Scene"
+    pallet:
+      - "textures/color-pallet-2.png"

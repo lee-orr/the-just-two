@@ -1,0 +1,7 @@
+monster:
+  name: monster
+  scene:
+    gltf: "models/base-models.gltf"
+    scene: "Scene"
+    pallet:
+      - "textures/color-pallet-2.png"

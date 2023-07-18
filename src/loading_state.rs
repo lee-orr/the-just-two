@@ -3,7 +3,7 @@ use std::ops::Mul;
 use bevy::prelude::*;
 use bevy_vector_shapes::{prelude::ShapePainter, shapes::DiscPainter};
 
-use crate::{state::AppState, ui_colors};
+use crate::{app_state::AppState, ui_colors};
 
 pub struct LoadingScreenPlugin;
 

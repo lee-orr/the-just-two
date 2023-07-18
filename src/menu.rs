@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use bevy_ui_dsl::*;
 
 use crate::{
+    app_state::AppState,
     assets::MainGameAssets,
-    state::AppState,
     toon_material::{BaseMaterial, ToonMaterial},
     ui_classes::*,
 };

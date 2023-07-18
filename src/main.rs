@@ -1,15 +1,16 @@
+mod app_state;
 mod assets;
 mod credits;
 mod in_game;
 mod loading_state;
 mod menu;
-mod state;
 mod toon_material;
 mod ui_classes;
 mod ui_colors;
 
 use std::time::Duration;
 
+use app_state::AppState;
 use assets::MainGameAssets;
 use bevy::{asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig, prelude::*};
 use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
@@ -18,7 +19,6 @@ use credits::CreditsPlugin;
 use in_game::InGamePlugin;
 use loading_state::LoadingScreenPlugin;
 use menu::MainMenuPlugin;
-use state::AppState;
 use toon_material::{ToonMaterial, ToonMaterialPlugin};
 
 fn main() {

@@ -1,11 +1,22 @@
+mod game_state;
+mod pause_screen;
+
 use bevy::prelude::*;
 
-use crate::{assets::MainGameAssets, state::AppState, toon_material::ToonMaterial};
+use crate::{app_state::AppState, assets::MainGameAssets, toon_material::ToonMaterial};
+
+use self::{
+    game_state::{GameState, PauseState},
+    pause_screen::PausePlugin,
+};
 pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppState::InGame), setup)
+        app.add_plugins(PausePlugin)
+            .add_state::<GameState>()
+            .add_state::<PauseState>()
+            .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(OnExit(AppState::InGame), (exit, clear_audio))
             .add_systems(
                 Update,
@@ -23,6 +34,7 @@ fn setup(
     _asset_server: Res<AssetServer>,
     _materials: ResMut<Assets<ToonMaterial>>,
 ) {
+    commands.insert_resource(NextState(Some(GameState::Encounter)));
     commands.insert_resource(AmbientLight {
         color: Color::ORANGE_RED,
         brightness: 0.02,
@@ -58,6 +70,8 @@ fn setup(
 }
 
 fn exit(mut commands: Commands, query: Query<Entity, With<InGame>>) {
+    commands.insert_resource(NextState(Some(GameState::None)));
+    commands.insert_resource(NextState(Some(PauseState::None)));
     for item in query.iter() {
         commands.entity(item).despawn_recursive();
     }
@@ -69,9 +83,16 @@ fn clear_audio(audio: Query<&AudioSink>) {
     }
 }
 
-fn process_input(mut commands: Commands, keys: Res<Input<KeyCode>>) {
+fn process_input(
+    mut commands: Commands,
+    keys: Res<Input<KeyCode>>,
+    paused: Res<State<PauseState>>,
+) {
     if keys.just_pressed(KeyCode::Escape) {
-        commands.insert_resource(NextState(Some(AppState::MainMenu)));
+        commands.insert_resource(NextState(Some(match paused.get() {
+            PauseState::None => PauseState::Paused,
+            PauseState::Paused => PauseState::None,
+        })));
     }
 }
 

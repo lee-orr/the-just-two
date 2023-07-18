@@ -3,15 +3,15 @@ use bevy_asset_loader::prelude::AssetCollection;
 
 #[derive(AssetCollection, Resource)]
 pub struct MainGameAssets {
-    #[asset(path = "base-models.gltf#Scene0")]
+    #[asset(path = "models/base-models.gltf#Scene0")]
     pub player_scene: Handle<Scene>,
-    #[asset(path = "ground.gltf#Scene0")]
+    #[asset(path = "models/ground.gltf#Scene0")]
     pub ground: Handle<Scene>,
-    #[asset(path = "color-pallet.png")]
+    #[asset(path = "textures/color-pallet.png")]
     pub base_colors: Handle<Image>,
-    #[asset(path = "shadow-gradient.png")]
+    #[asset(path = "textures/shadow-gradient.png")]
     pub shadow_gradient: Handle<Image>,
-    #[asset(path = "test.flac")]
+    #[asset(path = "music/test.flac")]
     pub menu_music: Handle<AudioSource>,
     #[asset(path = "fonts/ENDOR___.ttf")]
     pub knights_font: Handle<Font>,

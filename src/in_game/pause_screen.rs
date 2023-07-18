@@ -4,13 +4,15 @@ use bevy_ui_dsl::*;
 use crate::{
     app_state::AppState, assets::MainGameAssets, toon_material::ToonMaterial, ui_classes::*,
 };
-pub struct CreditsPlugin;
 
-impl Plugin for CreditsPlugin {
+use super::game_state::PauseState;
+pub struct PausePlugin;
+
+impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppState::Credits), setup)
-            .add_systems(OnExit(AppState::Credits), exit)
-            .add_systems(Update, process_input.run_if(in_state(AppState::Credits)));
+        app.add_systems(OnEnter(PauseState::Paused), setup)
+            .add_systems(OnExit(PauseState::Paused), exit)
+            .add_systems(Update, process_input.run_if(in_state(PauseState::Paused)));
     }
 }
 
@@ -23,38 +25,20 @@ fn setup(
     asset_server: Res<AssetServer>,
     _materials: ResMut<Assets<ToonMaterial>>,
 ) {
-    commands.insert_resource(AmbientLight {
-        color: Color::ORANGE_RED,
-        brightness: 0.02,
-    });
-
     let r = root(c_root, &asset_server, &mut commands, |p| {
         node(primary_box, p, |p| {
             node((span.nb(), primary_box_main.nb()), p, |p| {
-                text("The Just", (), (main_text, knight_text), p);
-                text("Two", (), (main_text, druid_text), p);
+                text("Game", (), (main_text, knight_text), p);
+                text("Paused", (), (main_text, druid_text), p);
             });
-            text("by Lee-Orr", primary_box_item.nb(), standard_text, p);
             text(
-                "Built using the Bevy Game Engine",
+                "Press Esc to Resume",
                 primary_box_item.nb(),
                 standard_text,
                 p,
             );
             text(
-                "Fonts by Appostrophic Labs, sourced from 1001freefonts.com",
-                primary_box_item.nb(),
-                standard_text,
-                p,
-            );
-            text(
-                "All other artistic assets created by Lee-Orr",
-                primary_box_item.nb(),
-                standard_text,
-                p,
-            );
-            text(
-                "Press Enter for the Main Menu",
+                "Press X to return to Main Menu",
                 primary_box_item.nb(),
                 standard_text,
                 p,
@@ -71,7 +55,7 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
 }
 
 fn process_input(mut commands: Commands, keys: Res<Input<KeyCode>>) {
-    if keys.just_pressed(KeyCode::Return) {
+    if keys.just_pressed(KeyCode::X) {
         commands.insert_resource(NextState(Some(AppState::MainMenu)));
     }
 }

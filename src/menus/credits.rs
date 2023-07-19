@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_ui_dsl::*;
 
-use crate::{app_state::AppState, ui::classes::*};
+use crate::{
+    app_state::AppState,
+    ui::{classes::*, ButtonQuery},
+};
 pub struct CreditsPlugin;
 
 impl Plugin for CreditsPlugin {
@@ -46,10 +49,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 standard_text,
                 p,
             );
-            text(
-                "Press Enter for the Main Menu",
-                primary_box_item.nb(),
-                standard_text,
+            text_button(
+                "Main Menu",
+                (c_button.nb(), primary_box_item.nb()),
+                button_text,
                 p,
             );
         });
@@ -63,8 +66,19 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
     }
 }
 
-fn process_input(mut commands: Commands, keys: Res<Input<KeyCode>>) {
-    if keys.just_pressed(KeyCode::Return) {
-        commands.insert_resource(NextState(Some(AppState::MainMenu)));
+fn process_input(mut commands: Commands, interaction_query: ButtonQuery) {
+    for (entity, interaction) in interaction_query.iter() {
+        let mut bundle = NodeBundle::default();
+        c_button(&mut bundle);
+        primary_box_item(&mut bundle);
+        match interaction {
+            Interaction::Pressed => {
+                c_button_pressed(&mut bundle);
+                commands.insert_resource(NextState(Some(AppState::MainMenu)));
+            }
+            Interaction::Hovered => c_button_hovered(&mut bundle),
+            Interaction::None => {}
+        };
+        commands.entity(entity).insert(bundle);
     }
 }

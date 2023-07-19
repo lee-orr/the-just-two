@@ -2,7 +2,10 @@ use bevy::prelude::*;
 
 use bevy_ui_dsl::*;
 
-use crate::{in_game::game_state::GameState, ui::classes::*};
+use crate::{
+    in_game::game_state::GameState,
+    ui::{classes::*, ButtonQuery},
+};
 
 use super::{EncounterSetup, EncounterState};
 pub struct IntroductionPlugin;
@@ -54,10 +57,11 @@ fn setup(
             if let Some(intro) = setup.introduction.as_deref() {
                 text(intro, primary_box_item.nb(), standard_text, p);
             }
-            text(
-                "Loading Encounter...",
-                primary_box_item.nb(),
-                standard_text,
+
+            text_button(
+                "Start Encounter",
+                (c_button.nb(), primary_box_item.nb(), c_button_disabled.nb()),
+                button_text,
                 p,
             )
             .set(&mut loading_encounter_text);
@@ -77,17 +81,29 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
     }
 }
 
-fn process_input(mut commands: Commands, keys: Res<Input<KeyCode>>) {
-    if keys.just_pressed(KeyCode::Return) {
-        commands.insert_resource(NextState(Some(EncounterState::ActionChoice)));
+fn process_input(mut commands: Commands, interaction_query: ButtonQuery) {
+    for (entity, interaction) in interaction_query.iter() {
+        let mut bundle = NodeBundle::default();
+        c_button(&mut bundle);
+        primary_box_item(&mut bundle);
+        match interaction {
+            Interaction::Pressed => {
+                c_button_pressed(&mut bundle);
+                commands.insert_resource(NextState(Some(EncounterState::ActionChoice)));
+            }
+            Interaction::Hovered => c_button_hovered(&mut bundle),
+            Interaction::None => {}
+        };
+        commands.entity(entity).insert(bundle);
     }
 }
 
-fn set_loaded_text(mut text: Query<&mut Text, With<LoadingEncounterText>>) {
-    for mut text in text.iter_mut() {
-        let Some(section) = text.sections.get_mut(0) else {
-            continue;
-        };
-        section.value = "Press Enter To Start".to_string();
+fn set_loaded_text(mut commands: Commands, button: Query<Entity, With<LoadingEncounterText>>) {
+    for button in button.iter() {
+        let mut bundle = NodeBundle::default();
+        c_button(&mut bundle);
+        primary_box_item(&mut bundle);
+
+        commands.entity(button).insert(bundle);
     }
 }

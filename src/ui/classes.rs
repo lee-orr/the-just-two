@@ -28,12 +28,27 @@ impl IntermediaryNodeBundleHandler for TextBundle {
     }
 }
 
+impl IntermediaryNodeBundleHandler for ButtonBundle {
+    fn style(&mut self) -> &mut Style {
+        &mut self.style
+    }
+
+    fn background_color(&mut self) -> &mut BackgroundColor {
+        &mut self.background_color
+    }
+}
+
 type Inner = Box<dyn FnOnce(&mut dyn IntermediaryNodeBundleHandler)>;
 
 pub struct IntermediaryNodeBundle(Inner);
 
 impl AssetClass<TextBundle> for IntermediaryNodeBundle {
     fn apply(self, _assets: &AssetServer, b: &mut TextBundle) {
+        self.0(b)
+    }
+}
+impl AssetClass<ButtonBundle> for IntermediaryNodeBundle {
+    fn apply(self, _assets: &AssetServer, b: &mut ButtonBundle) {
         self.0(b)
     }
 }
@@ -114,6 +129,31 @@ pub fn primary_box_main(b: &mut dyn IntermediaryNodeBundleHandler) {
 
 pub fn primary_box_item(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().grid_column = GridPlacement::start(2).set_span(1);
+}
+
+pub fn c_button(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().padding = UiRect::all(Val::Px(10.));
+    b.style().border = UiRect::all(Val::Px(2.));
+    b.style().margin = UiRect::all(Val::Px(10.));
+    b.style().justify_content = JustifyContent::Center;
+    b.style().align_items = AlignItems::Center;
+    b.background_color().0 = colors::PRIMARY_COLOR;
+}
+
+pub fn c_button_hovered(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_HOVER;
+}
+pub fn c_button_pressed(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_PRESSED;
+}
+pub fn c_button_disabled(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_DISABLED;
+}
+
+pub fn button_text(assets: &AssetServer, t: &mut TextStyle) {
+    t.font_size = 20.;
+    t.color = colors::BORDER_COLOR;
+    t.font = assets.load("fonts/AMERSN__.ttf");
 }
 
 pub fn main_text(_: &AssetServer, t: &mut TextStyle) {

@@ -8,14 +8,11 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.11", features = ["flac", "mp3"] }
 leafwing-input-manager = "0.10"
-iyes_progress = "0.9"
 bevy_common_assets = { version = "0.7.0", features = ["yaml"] }
 bevy_asset_loader = { version = "0.17", features = ["standard_dynamic_assets"]}
-bevy_mod_wanderlust = "0.4.0"
-bevy_dolly = "0.0.1"
-bevy_rapier3d = "0.22.0"
 bevy_vector_shapes = "0.5"
 console_error_panic_hook = "*"
 bevy-ui-dsl = "*"
 bevy-inspector-egui = "*"
 serde = "*"
+bevy_turborand = "0.6"

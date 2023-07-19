@@ -14,7 +14,7 @@ use self::{
     pause_screen::PausePlugin,
 };
 
-pub use self::encounter::{Challengers, Locations};
+pub use self::encounter::{Challengers, Locations, Players};
 pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {

@@ -1,7 +1,9 @@
+mod action_choice;
 mod challenger;
 mod encounter_assets;
 mod introduction;
 mod location;
+mod player;
 
 use bevy::{
     gltf::{Gltf, GltfNode},
@@ -16,18 +18,21 @@ use bevy_inspector_egui::{
 use crate::{assets::MainGameAssets, materialized_scene::MaterializedSceneBundle};
 
 use self::{
+    action_choice::ActionChoicePlugin,
     challenger::{ChallengerPlugin, ChallengerReference},
     encounter_assets::{
         setup_encounter_assets, EncounterAssetPlugin, EncounterAssets, Materials, SceneBundler,
     },
     introduction::IntroductionPlugin,
     location::{LocationPlugin, LocationReference},
+    player::{PlayerPlugin, PlayerReference},
 };
 
 use super::{factions::Faction, game_state::GameState};
 
 pub use self::challenger::Challengers;
 pub use self::location::Locations;
+pub use self::player::Players;
 
 pub struct EncounterPlugin;
 
@@ -45,6 +50,8 @@ impl Plugin for EncounterPlugin {
                 EncounterAssetPlugin,
                 LocationPlugin,
                 ChallengerPlugin,
+                PlayerPlugin,
+                ActionChoicePlugin,
             ))
             .add_systems(
                 OnEnter(GameState::Encounter),
@@ -85,7 +92,7 @@ pub struct EncounterSetup {
     pub title: Option<String>,
     pub introduction: Option<String>,
     pub player_faction: Faction,
-    pub player: Option<ChallengerReference>,
+    pub player: Option<PlayerReference>,
     pub challengers: Vec<(usize, ChallengerReference)>,
     pub location: Option<LocationReference>,
 }
@@ -108,16 +115,18 @@ fn generate_encounter(
     assets: Res<MainGameAssets>,
     locations: Res<Assets<Locations>>,
     challengers: Res<Assets<Challengers>>,
+    players: Res<Assets<Players>>,
 ) {
-    let (Some(locations), Some(challengers)) = (
+    let (Some(locations), Some(challengers), Some(players)) = (
         locations.get(&assets.locations),
         challengers.get(&assets.challengers),
+        players.get(&assets.players),
     ) else {
         return;
     };
     commands.insert_resource(EncounterSetup {
         location: locations.get("sand").cloned(),
-        player: challengers.get("player_knight").cloned(),
+        player: players.get("player_knight").cloned(),
         challengers: match challengers.get("monster") {
             Some(c) => vec![(3, c.clone())],
             None => vec![],

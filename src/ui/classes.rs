@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::color};
 use bevy_ui_dsl::{AssetClass, Class};
 
 use super::colors::{self, *};
@@ -70,6 +70,17 @@ pub fn c_root(b: &mut NodeBundle) {
     b.style.align_items = AlignItems::Center;
 }
 
+pub fn c_action_choice_root(b: &mut NodeBundle) {
+    b.style.width = Val::Percent(100.);
+    b.style.height = Val::Percent(100.);
+    b.style.display = Display::Flex;
+    b.style.flex_direction = FlexDirection::Row;
+    b.style.justify_content = JustifyContent::Center;
+    b.style.align_items = AlignItems::End;
+    b.style.padding = UiRect::all(Val::Px(30.));
+    b.style.column_gap = Val::Px(5.);
+}
+
 pub fn opaque(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.background_color().0 = colors::SCREEN_BACKGROUND_COLOR;
 }
@@ -133,4 +144,53 @@ pub fn span(b: &mut dyn IntermediaryNodeBundleHandler) {
 
 pub fn centered(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().justify_content = JustifyContent::Center;
+}
+
+pub fn card(b: &mut NodeBundle) {
+    b.style.padding = UiRect::all(Val::Px(10.));
+    b.style.border = UiRect::all(Val::Px(2.));
+    b.border_color.0 = colors::BORDER_COLOR;
+    b.background_color.0 = colors::PRIMARY_BACKGROUND_COLOR;
+
+    b.style.display = Display::Grid;
+    b.style.grid_template_columns = vec![
+        GridTrack::auto(),
+        GridTrack::percent(75.),
+        GridTrack::auto(),
+    ];
+    b.style.grid_template_rows = vec![
+        GridTrack::min_content(),
+        GridTrack::flex(10.),
+        GridTrack::min_content(),
+    ];
+}
+
+pub fn card_title(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().grid_column = GridPlacement::start(2).set_span(1);
+    b.style().grid_row = GridPlacement::start(1).set_span(1);
+}
+
+pub fn card_title_text(_: &AssetServer, t: &mut TextStyle) {
+    t.font_size = 40.;
+    t.color = PRIMARY_COLOR;
+}
+
+pub fn card_control(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().grid_column = GridPlacement::start(1).set_span(1);
+    b.style().grid_row = GridPlacement::start(3).set_span(1);
+    b.style().flex_direction = FlexDirection::Row;
+    b.style().align_items = AlignItems::FlexEnd;
+    b.style().top = Val::Px(5.);
+}
+
+pub fn card_content(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().grid_column = GridPlacement::start(2).set_span(1);
+    b.style().grid_row = GridPlacement::start(2).set_span(1);
+}
+
+pub fn card_secondary_info(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().grid_column = GridPlacement::start(3).set_span(1);
+    b.style().grid_row = GridPlacement::start(3).set_span(1);
+    b.style().flex_direction = FlexDirection::RowReverse;
+    b.style().align_items = AlignItems::FlexEnd;
 }

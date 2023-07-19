@@ -1,0 +1,14 @@
+player_druid:
+  name: player_druid
+  scene:
+    gltf: "models/base-models.gltf"
+    scene: "Scene"
+    pallet:
+      - "textures/color-pallet-1.png"
+player_knight:
+  name: player_knight
+  scene:
+    gltf: "models/base-models.gltf"
+    scene: "Scene"
+    pallet:
+      - "textures/color-pallet-2.png"

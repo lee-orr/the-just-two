@@ -4,7 +4,7 @@ use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 
 use crate::{
     app_state::AppState,
-    in_game::{Challengers, Locations},
+    in_game::{Challengers, Locations, Players},
 };
 
 pub struct MainGameAssetPlugin;
@@ -35,4 +35,6 @@ pub struct MainGameAssets {
     pub challengers: Handle<Challengers>,
     #[asset(path = "locations.lc.yaml")]
     pub locations: Handle<Locations>,
+    #[asset(path = "players.pl.yaml")]
+    pub players: Handle<Players>,
 }

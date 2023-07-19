@@ -3,7 +3,13 @@ use bevy_inspector_egui::quick::StateInspectorPlugin;
 use bevy_ui_dsl::*;
 
 use crate::{
-    app_state::AppState, assets::MainGameAssets, toon_material::ToonMaterial, ui::classes::*,
+    app_state::AppState,
+    assets::MainGameAssets,
+    toon_material::ToonMaterial,
+    ui::{
+        buttons::{focus_text_button, focused_button_activated, TypedFocusedButtonQuery},
+        classes::*,
+    },
 };
 
 use super::game_state::PauseState;
@@ -19,12 +25,25 @@ impl Plugin for PausePlugin {
             )
             .add_systems(OnEnter(PauseState::Paused), setup)
             .add_systems(OnExit(PauseState::Paused), exit)
-            .add_systems(Update, process_input.run_if(in_state(AppState::InGame)));
+            .add_systems(
+                Update,
+                (
+                    process_keyboard_input,
+                    (focused_button_activated.pipe(process_input)),
+                )
+                    .run_if(in_state(AppState::InGame)),
+            );
     }
 }
 
 #[derive(Component)]
 struct Screen;
+
+#[derive(Component)]
+enum Buttons {
+    Resume,
+    Menu,
+}
 
 fn setup(
     mut commands: Commands,
@@ -32,27 +51,37 @@ fn setup(
     asset_server: Res<AssetServer>,
     _materials: ResMut<Assets<ToonMaterial>>,
 ) {
+    let mut resume_button = None;
+    let mut menu_button = None;
     let r = root(c_root, &asset_server, &mut commands, |p| {
         node(primary_box, p, |p| {
             node((span.nb(), primary_box_main.nb()), p, |p| {
                 text("Game", (), (main_text, knight_text), p);
                 text("Paused", (), (main_text, druid_text), p);
             });
-            text(
-                "Press Esc to Resume",
-                primary_box_item.nb(),
-                standard_text,
+            focus_text_button(
+                "Resume Game",
+                (c_button.nb(), primary_box_item.nb()),
+                apply_button_state,
+                button_text,
                 p,
-            );
-            text(
-                "Press X to return to Main Menu",
-                primary_box_item.nb(),
-                standard_text,
+            )
+            .set(&mut resume_button);
+            focus_text_button(
+                "Main Menu",
+                (c_button.nb(), primary_box_item.nb()),
+                apply_button_state,
+                button_text,
                 p,
-            );
+            )
+            .set(&mut menu_button);
         });
     });
     commands.entity(r).insert(Screen);
+    commands
+        .entity(resume_button.unwrap())
+        .insert(Buttons::Resume);
+    commands.entity(menu_button.unwrap()).insert(Buttons::Menu);
 }
 
 fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
@@ -62,6 +91,27 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
 }
 
 fn process_input(
+    In(focused): In<Option<Entity>>,
+    mut commands: Commands,
+    interaction_query: TypedFocusedButtonQuery<'_, '_, '_, Buttons>,
+    paused: Res<State<PauseState>>,
+) {
+    let Some(focused) = focused else {
+        return;
+    };
+    let Some((_entity, btn)) = interaction_query.get(focused).ok() else {
+        return;
+    };
+    match btn {
+        Buttons::Resume => commands.insert_resource(NextState(Some(match paused.get() {
+            PauseState::None => PauseState::Paused,
+            PauseState::Paused => PauseState::None,
+        }))),
+        Buttons::Menu => commands.insert_resource(NextState(Some(AppState::MainMenu))),
+    };
+}
+
+fn process_keyboard_input(
     mut commands: Commands,
     keys: Res<Input<KeyCode>>,
     paused: Res<State<PauseState>>,
@@ -71,7 +121,5 @@ fn process_input(
             PauseState::None => PauseState::Paused,
             PauseState::Paused => PauseState::None,
         })));
-    } else if keys.just_pressed(KeyCode::X) && paused.get() == &PauseState::Paused {
-        commands.insert_resource(NextState(Some(AppState::MainMenu)));
     }
 }

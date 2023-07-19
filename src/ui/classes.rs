@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ui_dsl::{AssetClass, Class};
+use bevy_ui_navigation::{components::FocusableButtonBundle, prelude::FocusState};
 
 use super::colors::{self, *};
 
@@ -38,6 +39,16 @@ impl IntermediaryNodeBundleHandler for ButtonBundle {
     }
 }
 
+impl IntermediaryNodeBundleHandler for FocusableButtonBundle {
+    fn style(&mut self) -> &mut Style {
+        &mut self.button_bundle.style
+    }
+
+    fn background_color(&mut self) -> &mut BackgroundColor {
+        &mut self.button_bundle.background_color
+    }
+}
+
 type Inner = Box<dyn FnOnce(&mut dyn IntermediaryNodeBundleHandler)>;
 
 pub struct IntermediaryNodeBundle(Inner);
@@ -49,6 +60,11 @@ impl AssetClass<TextBundle> for IntermediaryNodeBundle {
 }
 impl AssetClass<ButtonBundle> for IntermediaryNodeBundle {
     fn apply(self, _assets: &AssetServer, b: &mut ButtonBundle) {
+        self.0(b)
+    }
+}
+impl AssetClass<FocusableButtonBundle> for IntermediaryNodeBundle {
+    fn apply(self, _assets: &AssetServer, b: &mut FocusableButtonBundle) {
         self.0(b)
     }
 }
@@ -83,6 +99,9 @@ pub fn c_root(b: &mut NodeBundle) {
     b.style.display = Display::Flex;
     b.style.justify_content = JustifyContent::Center;
     b.style.align_items = AlignItems::Center;
+    b.style.position_type = PositionType::Absolute;
+    b.style.left = Val::Px(0.);
+    b.style.top = Val::Px(0.);
 }
 
 pub fn c_action_choice_root(b: &mut NodeBundle) {
@@ -140,14 +159,31 @@ pub fn c_button(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.background_color().0 = colors::PRIMARY_COLOR;
 }
 
-pub fn c_button_hovered(b: &mut dyn IntermediaryNodeBundleHandler) {
-    b.background_color().0 = colors::PRIMARY_COLOR_HOVER;
+pub fn c_button_prioritized(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_PRIORITIZED;
 }
-pub fn c_button_pressed(b: &mut dyn IntermediaryNodeBundleHandler) {
-    b.background_color().0 = colors::PRIMARY_COLOR_PRESSED;
+pub fn c_button_focused(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_PRIORITIZED;
 }
-pub fn c_button_disabled(b: &mut dyn IntermediaryNodeBundleHandler) {
-    b.background_color().0 = colors::PRIMARY_COLOR_DISABLED;
+pub fn c_button_active(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_ACTIVE;
+}
+pub fn c_button_blocked(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_BLOCKED;
+}
+
+pub fn apply_button_state(state: FocusState) -> NodeBundle {
+    let mut bundle = NodeBundle::default();
+    c_button(&mut bundle);
+    primary_box_item(&mut bundle);
+    match state {
+        FocusState::Prioritized => c_button_prioritized(&mut bundle),
+        FocusState::Focused => c_button_focused(&mut bundle),
+        FocusState::Active => c_button_active(&mut bundle),
+        FocusState::Blocked => c_button_blocked(&mut bundle),
+        FocusState::Inert => {}
+    };
+    bundle
 }
 
 pub fn button_text(assets: &AssetServer, t: &mut TextStyle) {

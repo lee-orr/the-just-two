@@ -16,6 +16,7 @@ use bevy::{
 };
 
 use bevy_inspector_egui::quick::{StateInspectorPlugin, WorldInspectorPlugin};
+use bevy_ui_navigation::{systems::InputMapping, DefaultNavigationPlugins};
 use bevy_vector_shapes::Shape2dPlugin;
 use credits::CreditsPlugin;
 use in_game::InGamePlugin;
@@ -24,6 +25,7 @@ use materialized_scene::SceneSpawnerPlugin;
 use menu::MainMenuPlugin;
 use menus::{credits, loading_state, menu};
 use toon_material::ToonMaterialPlugin;
+use ui::UiPlugin;
 
 fn main() {
     #[cfg(target_arch = "wasm32")]
@@ -46,8 +48,14 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             Shape2dPlugin::default(),
             WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::F1)),
+            DefaultNavigationPlugins,
         ))
         .insert_resource(ClearColor(ui::colors::SCREEN_BACKGROUND_COLOR))
+        .insert_resource(InputMapping {
+            keyboard_navigation: true,
+            focus_follows_mouse: true,
+            ..default()
+        })
         .add_plugins((
             ToonMaterialPlugin,
             LoadingScreenPlugin,
@@ -56,6 +64,7 @@ fn main() {
             InGamePlugin,
             SceneSpawnerPlugin,
             MainGameAssetPlugin,
+            UiPlugin,
         ))
         .add_state::<AppState>()
         .register_type::<AppState>()

@@ -3,7 +3,10 @@ use bevy_ui_dsl::*;
 
 use crate::{
     app_state::AppState,
-    ui::{classes::*, ButtonQuery},
+    ui::{
+        buttons::{focus_text_button, focused_button_activated},
+        classes::*,
+    },
 };
 pub struct CreditsPlugin;
 
@@ -11,7 +14,10 @@ impl Plugin for CreditsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::Credits), setup)
             .add_systems(OnExit(AppState::Credits), exit)
-            .add_systems(Update, process_input.run_if(in_state(AppState::Credits)));
+            .add_systems(
+                Update,
+                (focused_button_activated.pipe(process_input)).run_if(in_state(AppState::Credits)),
+            );
     }
 }
 
@@ -49,9 +55,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 standard_text,
                 p,
             );
-            text_button(
+            focus_text_button(
                 "Main Menu",
                 (c_button.nb(), primary_box_item.nb()),
+                apply_button_state,
                 button_text,
                 p,
             );
@@ -66,19 +73,9 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
     }
 }
 
-fn process_input(mut commands: Commands, interaction_query: ButtonQuery) {
-    for (entity, interaction) in interaction_query.iter() {
-        let mut bundle = NodeBundle::default();
-        c_button(&mut bundle);
-        primary_box_item(&mut bundle);
-        match interaction {
-            Interaction::Pressed => {
-                c_button_pressed(&mut bundle);
-                commands.insert_resource(NextState(Some(AppState::MainMenu)));
-            }
-            Interaction::Hovered => c_button_hovered(&mut bundle),
-            Interaction::None => {}
-        };
-        commands.entity(entity).insert(bundle);
-    }
+fn process_input(In(focused): In<Option<Entity>>, mut commands: Commands) {
+    let Some(_) = focused else {
+        return;
+    };
+    commands.insert_resource(NextState(Some(AppState::MainMenu)));
 }

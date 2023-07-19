@@ -1,10 +1,14 @@
 use bevy::prelude::*;
 
 use bevy_ui_dsl::*;
+use bevy_ui_navigation::prelude::Focusable;
 
 use crate::{
     in_game::game_state::GameState,
-    ui::{classes::*, ButtonQuery},
+    ui::{
+        buttons::{focus_text_button, focused_button_activated},
+        classes::*,
+    },
 };
 
 use super::{EncounterSetup, EncounterState};
@@ -17,7 +21,8 @@ impl Plugin for IntroductionPlugin {
             .add_systems(OnExit(EncounterState::Introduction), exit)
             .add_systems(
                 Update,
-                process_input.run_if(in_state(EncounterState::Introduction)),
+                (focused_button_activated.pipe(process_input))
+                    .run_if(in_state(EncounterState::Introduction)),
             );
     }
 }
@@ -58,9 +63,10 @@ fn setup(
                 text(intro, primary_box_item.nb(), standard_text, p);
             }
 
-            text_button(
+            focus_text_button(
                 "Start Encounter",
-                (c_button.nb(), primary_box_item.nb(), c_button_disabled.nb()),
+                (c_button.nb(), primary_box_item.nb(), c_button_blocked.nb()),
+                apply_button_state,
                 button_text,
                 p,
             )
@@ -71,7 +77,8 @@ fn setup(
     if let Some(loading_encounter_text) = loading_encounter_text {
         commands
             .entity(loading_encounter_text)
-            .insert(LoadingEncounterText);
+            .insert(LoadingEncounterText)
+            .insert(Focusable::default().blocked());
     }
 }
 
@@ -81,29 +88,15 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
     }
 }
 
-fn process_input(mut commands: Commands, interaction_query: ButtonQuery) {
-    for (entity, interaction) in interaction_query.iter() {
-        let mut bundle = NodeBundle::default();
-        c_button(&mut bundle);
-        primary_box_item(&mut bundle);
-        match interaction {
-            Interaction::Pressed => {
-                c_button_pressed(&mut bundle);
-                commands.insert_resource(NextState(Some(EncounterState::ActionChoice)));
-            }
-            Interaction::Hovered => c_button_hovered(&mut bundle),
-            Interaction::None => {}
-        };
-        commands.entity(entity).insert(bundle);
-    }
+fn process_input(In(focused): In<Option<Entity>>, mut commands: Commands) {
+    let Some(_) = focused else {
+        return;
+    };
+    commands.insert_resource(NextState(Some(EncounterState::ActionChoice)));
 }
 
 fn set_loaded_text(mut commands: Commands, button: Query<Entity, With<LoadingEncounterText>>) {
     for button in button.iter() {
-        let mut bundle = NodeBundle::default();
-        c_button(&mut bundle);
-        primary_box_item(&mut bundle);
-
-        commands.entity(button).insert(bundle);
+        commands.entity(button).insert(Focusable::default());
     }
 }

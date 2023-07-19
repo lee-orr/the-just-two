@@ -4,7 +4,10 @@ use bevy_ui_dsl::*;
 use crate::{
     app_state::AppState,
     assets::MainGameAssets,
-    ui::{classes::*, TypedButtonQuery},
+    ui::{
+        buttons::{focus_text_button, focused_button_activated, TypedFocusedButtonQuery},
+        classes::*,
+    },
 };
 pub struct MainMenuPlugin;
 
@@ -12,7 +15,10 @@ impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::MainMenu), setup)
             .add_systems(OnExit(AppState::MainMenu), exit)
-            .add_systems(Update, process_input.run_if(in_state(AppState::MainMenu)));
+            .add_systems(
+                Update,
+                (focused_button_activated.pipe(process_input)).run_if(in_state(AppState::MainMenu)),
+            );
     }
 }
 
@@ -40,16 +46,18 @@ fn setup(mut commands: Commands, _assets: Res<MainGameAssets>, asset_server: Res
                 text("The Just", (), (main_text, knight_text), p);
                 text("Two", (), (main_text, druid_text), p);
             });
-            text_button(
+            focus_text_button(
                 "Start Game",
                 (c_button.nb(), primary_box_item.nb()),
+                apply_button_state,
                 button_text,
                 p,
             )
             .set(&mut start_button);
-            text_button(
+            focus_text_button(
                 "Credits",
                 (c_button.nb(), primary_box_item.nb()),
+                apply_button_state,
                 button_text,
                 p,
             )
@@ -71,24 +79,19 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
     }
 }
 
-fn process_input(mut commands: Commands, interaction_query: TypedButtonQuery<'_, '_, '_, Buttons>) {
-    for (entity, interaction, btn) in interaction_query.iter() {
-        let mut bundle = NodeBundle::default();
-        c_button(&mut bundle);
-        primary_box_item(&mut bundle);
-        match interaction {
-            Interaction::Pressed => {
-                c_button_pressed(&mut bundle);
-                match btn {
-                    Buttons::Start => commands.insert_resource(NextState(Some(AppState::InGame))),
-                    Buttons::Credits => {
-                        commands.insert_resource(NextState(Some(AppState::Credits)))
-                    }
-                };
-            }
-            Interaction::Hovered => c_button_hovered(&mut bundle),
-            Interaction::None => {}
-        };
-        commands.entity(entity).insert(bundle);
-    }
+fn process_input(
+    In(focused): In<Option<Entity>>,
+    mut commands: Commands,
+    interaction_query: TypedFocusedButtonQuery<'_, '_, '_, Buttons>,
+) {
+    let Some(focused) = focused else {
+        return;
+    };
+    let Some((_entity, btn)) = interaction_query.get(focused).ok() else {
+        return;
+    };
+    match btn {
+        Buttons::Start => commands.insert_resource(NextState(Some(AppState::InGame))),
+        Buttons::Credits => commands.insert_resource(NextState(Some(AppState::Credits))),
+    };
 }

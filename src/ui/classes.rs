@@ -104,6 +104,11 @@ pub fn c_root(b: &mut NodeBundle) {
     b.style.top = Val::Px(0.);
 }
 
+pub fn overlay(b: &mut NodeBundle) {
+    b.z_index = ZIndex::Global(20);
+    b.background_color.0 = OVERLAY_COLOR;
+}
+
 pub fn c_action_choice_root(b: &mut NodeBundle) {
     b.style.width = Val::Percent(100.);
     b.style.height = Val::Percent(100.);

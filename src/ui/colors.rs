@@ -9,3 +9,5 @@ pub const PRIMARY_COLOR_PRIORITIZED: Color = Color::rgb(0.6, 0.7, 0.6);
 pub const PRIMARY_COLOR_FOCUSED: Color = Color::rgb(0.5, 0.6, 0.5);
 pub const PRIMARY_COLOR_ACTIVE: Color = Color::rgb(0.6, 0.7, 0.6);
 pub const PRIMARY_COLOR_BLOCKED: Color = Color::rgb(0.4, 0.3, 0.4);
+
+pub const OVERLAY_COLOR: Color = Color::rgba(0., 0., 0., 0.9);

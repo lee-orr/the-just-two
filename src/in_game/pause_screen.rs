@@ -4,8 +4,6 @@ use bevy_ui_dsl::*;
 
 use crate::{
     app_state::AppState,
-    assets::MainGameAssets,
-    toon_material::ToonMaterial,
     ui::{
         buttons::{focus_text_button, focused_button_activated, TypedFocusedButtonQuery},
         classes::*,
@@ -45,15 +43,10 @@ enum Buttons {
     Menu,
 }
 
-fn setup(
-    mut commands: Commands,
-    _assets: Res<MainGameAssets>,
-    asset_server: Res<AssetServer>,
-    _materials: ResMut<Assets<ToonMaterial>>,
-) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut resume_button = None;
     let mut menu_button = None;
-    let r = root(c_root, &asset_server, &mut commands, |p| {
+    let r = root((overlay, c_root), &asset_server, &mut commands, |p| {
         node(primary_box, p, |p| {
             node((span.nb(), primary_box_main.nb()), p, |p| {
                 text("Game", (), (main_text, knight_text), p);

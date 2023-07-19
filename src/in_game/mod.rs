@@ -3,7 +3,9 @@ mod factions;
 mod game_state;
 mod pause_screen;
 
-use bevy::{input::common_conditions::input_toggle_active, prelude::*};
+use bevy::{
+    ecs::schedule::ScheduleLabel, input::common_conditions::input_toggle_active, prelude::*,
+};
 use bevy_inspector_egui::quick::StateInspectorPlugin;
 
 use crate::{app_state::AppState, assets::MainGameAssets};
@@ -28,12 +30,19 @@ impl Plugin for InGamePlugin {
             )
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(OnExit(AppState::InGame), (exit, clear_audio))
-            .add_systems(Update, (enable_audio).run_if(in_state(AppState::InGame)));
+            .add_systems(Update, (enable_audio).run_if(in_state(AppState::InGame)))
+            .add_systems(
+                Update,
+                run_in_game_update.run_if(in_state(PauseState::None)),
+            );
     }
 }
 
 #[derive(Component)]
 struct InGame;
+
+#[derive(ScheduleLabel, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct InGameUpdate;
 
 fn setup(mut commands: Commands, assets: Res<MainGameAssets>) {
     commands.insert_resource(NextState(Some(GameState::Encounter)));
@@ -80,4 +89,8 @@ fn enable_audio(audio: Query<&AudioSink>) {
             audio.play();
         }
     }
+}
+
+fn run_in_game_update(world: &mut World) {
+    let _ = world.try_run_schedule(InGameUpdate);
 }

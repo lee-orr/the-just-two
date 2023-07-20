@@ -40,7 +40,7 @@ fn setup(
     actions: Query<(Entity, &ActionChoice)>,
 ) {
     let r = root(c_action_choice_root, &asset_server, &mut commands, |p| {
-        for (entity, choice) in actions.iter() {
+        for (_entity, choice) in actions.iter() {
             node(card, p, |p| {
                 text(
                     choice.title.as_str(),

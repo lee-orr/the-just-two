@@ -1,4 +1,4 @@
-use bevy::{ecs::schedule::ScheduleLabel, prelude::*};
+use bevy::prelude::*;
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 
 #[derive(Clone, Eq, PartialEq, Copy, Debug, Hash, Default, States, Reflect, InspectorOptions)]

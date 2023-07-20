@@ -6,7 +6,7 @@ use crate::{
     toon_material::ToonMaterial,
 };
 
-use super::{EncounterSetup, EncounterState};
+use super::{sequencing::EncounterState, EncounterSetup};
 use bevy::{
     gltf::{Gltf, GltfNode},
     prelude::*,

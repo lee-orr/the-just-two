@@ -256,12 +256,11 @@ pub fn card_title_text(_: &AssetServer, t: &mut TextStyle) {
     t.color = PRIMARY_COLOR;
 }
 
-pub fn card_control(b: &mut dyn IntermediaryNodeBundleHandler) {
+pub fn card_fail(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().grid_column = GridPlacement::start(1).set_span(1);
     b.style().grid_row = GridPlacement::start(3).set_span(1);
     b.style().flex_direction = FlexDirection::Row;
     b.style().align_items = AlignItems::FlexEnd;
-    b.style().top = Val::Px(5.);
 }
 
 pub fn card_content(b: &mut dyn IntermediaryNodeBundleHandler) {
@@ -269,9 +268,28 @@ pub fn card_content(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().grid_row = GridPlacement::start(2).set_span(1);
 }
 
-pub fn card_secondary_info(b: &mut dyn IntermediaryNodeBundleHandler) {
+pub fn card_success(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().grid_column = GridPlacement::start(3).set_span(1);
     b.style().grid_row = GridPlacement::start(3).set_span(1);
     b.style().flex_direction = FlexDirection::RowReverse;
     b.style().align_items = AlignItems::FlexEnd;
+    b.style().column_gap = Val::Px(5.);
+}
+
+pub fn card_fail_text(assets: &AssetServer, t: &mut TextStyle) {
+    t.font_size = 20.;
+    t.color = FAIL_COLOR;
+    t.font = assets.load("fonts/AMERSN__.ttf");
+}
+
+pub fn card_success_text(assets: &AssetServer, t: &mut TextStyle) {
+    t.font_size = 20.;
+    t.color = SUCCESS_COLOR;
+    t.font = assets.load("fonts/AMERSN__.ttf");
+}
+
+pub fn card_critical(assets: &AssetServer, t: &mut TextStyle) {
+    t.font_size = 20.;
+    t.color = CRITICAL_COLOR;
+    t.font = assets.load("fonts/AMERSN__.ttf");
 }

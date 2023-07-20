@@ -9,11 +9,20 @@ use serde::Deserialize;
 
 use crate::materialized_scene::{MaterializedScene, MaterializedSceneReference};
 
+use super::{
+    action_choice::ActionChoice,
+    sequencing::{EncounterState, PublishAvailableActions},
+};
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_plugins(YamlAssetPlugin::<Players>::new(&["pl.yaml"]));
+        app.add_plugins(YamlAssetPlugin::<Players>::new(&["pl.yaml"]))
+            .add_systems(
+                OnEnter(EncounterState::ActionChoice),
+                say_hello_action.in_set(PublishAvailableActions),
+            );
     }
 }
 
@@ -37,4 +46,14 @@ impl Players {
     pub fn get(&self, key: &str) -> Option<&PlayerReference> {
         self.0.get(key)
     }
+}
+
+fn say_hello_action(mut commands: Commands) {
+    commands.spawn(ActionChoice {
+        title: "Hello!".to_string(),
+        content: "Say Hi".to_string(),
+        fail: 4,
+        success: 10,
+        critical_success: 15,
+    });
 }

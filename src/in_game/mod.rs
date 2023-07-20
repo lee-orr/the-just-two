@@ -11,7 +11,7 @@ use bevy_inspector_egui::quick::StateInspectorPlugin;
 use crate::{app_state::AppState, assets::MainGameAssets};
 
 use self::{
-    encounter::{EncounterPlugin, EncounterState},
+    encounter::{sequencing::EncounterState, EncounterPlugin},
     game_state::{GameState, PauseState},
     pause_screen::PausePlugin,
 };

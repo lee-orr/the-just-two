@@ -4,6 +4,7 @@ mod encounter_assets;
 mod introduction;
 mod location;
 mod player;
+pub mod sequencing;
 
 use bevy::{
     gltf::{Gltf, GltfNode},
@@ -26,6 +27,7 @@ use self::{
     introduction::IntroductionPlugin,
     location::{LocationPlugin, LocationReference},
     player::{PlayerPlugin, PlayerReference},
+    sequencing::EncounterState,
 };
 
 use super::{factions::Faction, game_state::GameState};
@@ -72,19 +74,6 @@ impl Plugin for EncounterPlugin {
 
 #[derive(Component)]
 pub struct EncounterEntity;
-
-#[derive(Clone, Eq, PartialEq, Copy, Debug, Hash, Default, States, Reflect, InspectorOptions)]
-#[reflect(InspectorOptions)]
-pub enum EncounterState {
-    #[default]
-    None,
-    Loading,
-    Introduction,
-    ActionChoice,
-    ProbabilitySetup,
-    OutcomeResolution,
-    EncounterResolved,
-}
 
 #[derive(Resource, Reflect, InspectorOptions)]
 #[reflect(Resource, InspectorOptions)]

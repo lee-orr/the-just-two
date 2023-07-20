@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-use super::{EncounterSetup, EncounterState};
+use super::{sequencing::EncounterState, EncounterSetup};
 pub struct IntroductionPlugin;
 
 impl Plugin for IntroductionPlugin {

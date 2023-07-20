@@ -11,3 +11,7 @@ pub const PRIMARY_COLOR_ACTIVE: Color = Color::rgb(0.6, 0.7, 0.6);
 pub const PRIMARY_COLOR_BLOCKED: Color = Color::rgb(0.4, 0.3, 0.4);
 
 pub const OVERLAY_COLOR: Color = Color::rgba(0., 0., 0., 0.9);
+
+pub const CRITICAL_COLOR: Color = Color::rgb(0.8, 0.9, 0.1);
+pub const SUCCESS_COLOR: Color = Color::rgb(0.3, 0.8, 0.3);
+pub const FAIL_COLOR: Color = Color::rgb(0.7, 0.2, 0.1);

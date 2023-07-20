@@ -14,6 +14,9 @@ pub enum EncounterState {
     EncounterResolved,
 }
 
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+pub struct ClearUnusuedActions;
+
 #[derive(SystemSet, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PublishAvailableActions;
 

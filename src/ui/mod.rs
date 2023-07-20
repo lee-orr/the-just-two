@@ -7,6 +7,8 @@ pub mod buttons;
 pub mod classes;
 pub mod colors;
 
+pub mod intermediary_node_bundles;
+
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {

@@ -1,6 +1,7 @@
 use crate::ui::{
     buttons::{focus_button, focused_button_activated, TypedFocusedButtonQuery},
     classes::*,
+    intermediary_node_bundles::*,
 };
 use bevy::prelude::*;
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};

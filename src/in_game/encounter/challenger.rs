@@ -9,11 +9,20 @@ use serde::Deserialize;
 
 use crate::materialized_scene::{MaterializedScene, MaterializedSceneReference};
 
+use super::{
+    action_choice::{ActionChoice, ChallengerAction},
+    sequencing::{EncounterState, PublishAvailableActions},
+};
+
 pub struct ChallengerPlugin;
 
 impl Plugin for ChallengerPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_plugins(YamlAssetPlugin::<Challengers>::new(&["ch.yaml"]));
+        app.add_plugins(YamlAssetPlugin::<Challengers>::new(&["ch.yaml"]))
+            .add_systems(
+                OnEnter(EncounterState::ActionChoice),
+                say_challenge_action.in_set(PublishAvailableActions),
+            );
     }
 }
 
@@ -37,4 +46,17 @@ impl Challengers {
     pub fn get(&self, key: &str) -> Option<&ChallengerReference> {
         self.0.get(key)
     }
+}
+
+fn say_challenge_action(mut commands: Commands) {
+    commands.spawn((
+        ActionChoice {
+            title: "A CHALLENGE!".to_string(),
+            content: "I Challenge you to a game of fiddlesticks!".to_string(),
+            fail: 4,
+            success: 10,
+            critical_success: 15,
+        },
+        ChallengerAction,
+    ));
 }

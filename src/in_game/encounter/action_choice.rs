@@ -55,6 +55,9 @@ pub struct ActionChoice {
 #[derive(Component)]
 pub struct ChosenAction;
 
+#[derive(Component)]
+pub struct ChallengerAction;
+
 #[derive(Component, InspectorOptions, Reflect)]
 #[reflect(InspectorOptions)]
 struct ChoiceButton(Entity);
@@ -62,7 +65,7 @@ struct ChoiceButton(Entity);
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    actions: Query<(Entity, &ActionChoice)>,
+    actions: Query<(Entity, &ActionChoice), Without<ChallengerAction>>,
 ) {
     let mut choices = vec![];
     let r = root(c_action_choice_root, &asset_server, &mut commands, |p| {
@@ -114,10 +117,21 @@ fn setup(
     }
 }
 
+type UnchosenActions<'w, 's> = Query<
+    'w,
+    's,
+    Entity,
+    (
+        With<ActionChoice>,
+        Without<ChosenAction>,
+        Without<ChallengerAction>,
+    ),
+>;
+
 fn exit(
     mut commands: Commands,
     query: Query<Entity, With<Screen>>,
-    unchosen_actions: Query<Entity, (With<ActionChoice>, Without<ChosenAction>)>,
+    unchosen_actions: UnchosenActions,
 ) {
     for item in query.iter() {
         commands.entity(item).despawn_recursive();

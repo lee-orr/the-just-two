@@ -1,9 +1,12 @@
 mod action_choice;
+mod actions;
 mod challenger;
+mod dice_pools;
 mod encounter_assets;
 mod introduction;
 mod location;
 mod player;
+mod probability_setup;
 pub mod sequencing;
 
 use bevy::{
@@ -31,6 +34,7 @@ use self::{
     introduction::IntroductionPlugin,
     location::{LocationPlugin, LocationReference},
     player::{PlayerPlugin, PlayerReference},
+    probability_setup::ProbabilitySetupPlugin,
     sequencing::EncounterState,
 };
 
@@ -58,6 +62,7 @@ impl Plugin for EncounterPlugin {
                 ChallengerPlugin,
                 PlayerPlugin,
                 ActionChoicePlugin,
+                ProbabilitySetupPlugin,
             ))
             .add_systems(
                 OnEnter(GameState::Encounter),

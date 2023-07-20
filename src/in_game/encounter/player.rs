@@ -10,7 +10,7 @@ use serde::Deserialize;
 use crate::materialized_scene::MaterializedSceneReference;
 
 use super::{
-    action_choice::ActionChoice,
+    actions::{ActionChoice, PlayerActionBundle},
     sequencing::{EncounterState, PublishAvailableActions},
 };
 
@@ -53,19 +53,25 @@ impl Players {
 fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
     for (entity, player) in players.iter() {
         commands.entity(entity).with_children(|p| {
-            p.spawn(ActionChoice {
-                title: "Hello!".to_string(),
-                content: format!("Say Hi as {}", player.name),
-                fail: 4,
-                success: 10,
-                critical_success: 15,
+            p.spawn(PlayerActionBundle {
+                action_choice: ActionChoice {
+                    title: "Hello!".to_string(),
+                    content: format!("Say Hi as {}", player.name),
+                    fail: 4,
+                    success: 10,
+                    critical_success: 15,
+                },
+                ..default()
             });
-            p.spawn(ActionChoice {
-                title: "Goodbye!".to_string(),
-                content: format!("Say Bye as {}", player.name),
-                fail: 5,
-                success: 8,
-                critical_success: 10,
+            p.spawn(PlayerActionBundle {
+                action_choice: ActionChoice {
+                    title: "Goodbye!".to_string(),
+                    content: format!("Say Bye as {}", player.name),
+                    fail: 5,
+                    success: 8,
+                    critical_success: 10,
+                },
+                ..default()
             });
         });
     }

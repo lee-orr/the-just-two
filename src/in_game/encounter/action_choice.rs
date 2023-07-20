@@ -10,6 +10,8 @@ use super::sequencing::{
     ClearUnusuedActions, EncounterState, FlushAvailableActions, PublishAvailableActions,
 };
 
+use super::actions::*;
+
 pub struct ActionChoicePlugin;
 
 impl Plugin for ActionChoicePlugin {
@@ -41,22 +43,6 @@ impl Plugin for ActionChoicePlugin {
 
 #[derive(Component)]
 struct Screen;
-
-#[derive(Component, InspectorOptions, Reflect)]
-#[reflect(InspectorOptions)]
-pub struct ActionChoice {
-    pub title: String,
-    pub content: String,
-    pub fail: usize,
-    pub success: usize,
-    pub critical_success: usize,
-}
-
-#[derive(Component)]
-pub struct ChosenAction;
-
-#[derive(Component)]
-pub struct ChallengerAction;
 
 #[derive(Component, InspectorOptions, Reflect)]
 #[reflect(InspectorOptions)]

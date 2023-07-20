@@ -15,5 +15,5 @@ console_error_panic_hook = "*"
 bevy-ui-dsl = "*"
 bevy-inspector-egui = "*"
 serde = "*"
-bevy_turborand = "0.6"
+bevy_turborand = { version = "0.6" }
 bevy-ui-navigation = "0.27.0"

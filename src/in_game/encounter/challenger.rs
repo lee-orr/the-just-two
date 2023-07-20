@@ -10,7 +10,7 @@ use serde::Deserialize;
 use crate::materialized_scene::MaterializedSceneReference;
 
 use super::{
-    action_choice::{ActionChoice, ChallengerAction},
+    actions::{ActionChoice, ChallengerActionBundle},
     sequencing::{EncounterState, PublishAvailableActions},
 };
 
@@ -54,8 +54,8 @@ impl Challengers {
 fn say_challenge_action(mut commands: Commands, challengers: Query<(Entity, &Challenger)>) {
     for (entity, challenger) in challengers.iter() {
         commands.entity(entity).with_children(|p| {
-            p.spawn((
-                ActionChoice {
+            p.spawn(ChallengerActionBundle {
+                action_choice: ActionChoice {
                     title: "A CHALLENGE!".to_string(),
                     content: format!(
                         "I, {} ({}), Challenge you to a game of fiddlesticks!",
@@ -65,8 +65,8 @@ fn say_challenge_action(mut commands: Commands, challengers: Query<(Entity, &Cha
                     success: 10,
                     critical_success: 15,
                 },
-                ChallengerAction,
-            ));
+                ..default()
+            });
         });
     }
 }

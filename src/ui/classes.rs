@@ -228,27 +228,25 @@ pub fn centered(b: &mut dyn IntermediaryNodeBundleHandler) {
 }
 
 pub fn card(b: &mut NodeBundle) {
-    b.style.padding = UiRect::all(Val::Px(10.));
     b.style.border = UiRect::all(Val::Px(2.));
     b.border_color.0 = colors::BORDER_COLOR;
     b.background_color.0 = colors::PRIMARY_BACKGROUND_COLOR;
 
     b.style.display = Display::Grid;
-    b.style.grid_template_columns = vec![
-        GridTrack::auto(),
-        GridTrack::percent(75.),
-        GridTrack::auto(),
-    ];
     b.style.grid_template_rows = vec![
-        GridTrack::min_content(),
-        GridTrack::flex(10.),
-        GridTrack::min_content(),
+        GridTrack::fr(1.5),
+        GridTrack::max_content(),
+        GridTrack::fr(1.),
     ];
 }
 
 pub fn card_title(b: &mut dyn IntermediaryNodeBundleHandler) {
-    b.style().grid_column = GridPlacement::start(2).set_span(1);
+    b.style().padding = UiRect::all(Val::Px(5.));
     b.style().grid_row = GridPlacement::start(1).set_span(1);
+    b.style().flex_direction = FlexDirection::Row;
+    b.style().align_items = AlignItems::Center;
+    b.style().justify_content = JustifyContent::Center;
+    b.background_color().0 = colors::OVERLAY_COLOR;
 }
 
 pub fn card_title_text(_: &AssetServer, t: &mut TextStyle) {
@@ -256,21 +254,28 @@ pub fn card_title_text(_: &AssetServer, t: &mut TextStyle) {
     t.color = PRIMARY_COLOR;
 }
 
+pub fn card_footer(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().padding = UiRect::all(Val::Px(5.));
+    b.style().grid_row = GridPlacement::start(3).set_span(1);
+    b.style().flex_direction = FlexDirection::Row;
+    b.style().align_items = AlignItems::Center;
+    b.style().justify_content = JustifyContent::SpaceBetween;
+    b.background_color().0 = colors::OVERLAY_COLOR;
+}
+
 pub fn card_fail(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().grid_column = GridPlacement::start(1).set_span(1);
-    b.style().grid_row = GridPlacement::start(3).set_span(1);
     b.style().flex_direction = FlexDirection::Row;
     b.style().align_items = AlignItems::FlexEnd;
 }
 
 pub fn card_content(b: &mut dyn IntermediaryNodeBundleHandler) {
-    b.style().grid_column = GridPlacement::start(2).set_span(1);
+    b.style().padding = UiRect::all(Val::Px(5.));
     b.style().grid_row = GridPlacement::start(2).set_span(1);
 }
 
 pub fn card_success(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().grid_column = GridPlacement::start(3).set_span(1);
-    b.style().grid_row = GridPlacement::start(3).set_span(1);
     b.style().flex_direction = FlexDirection::RowReverse;
     b.style().align_items = AlignItems::FlexEnd;
     b.style().column_gap = Val::Px(5.);

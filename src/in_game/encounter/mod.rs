@@ -16,7 +16,11 @@ use bevy_inspector_egui::{
     prelude::ReflectInspectorOptions, quick::StateInspectorPlugin, InspectorOptions,
 };
 
-use crate::{assets::MainGameAssets, materialized_scene::MaterializedSceneBundle};
+use crate::{
+    assets::MainGameAssets,
+    in_game::encounter::{challenger::Challenger, player::Player},
+    materialized_scene::MaterializedSceneBundle,
+};
 
 use self::{
     action_choice::ActionChoicePlugin,
@@ -168,7 +172,13 @@ fn spawn_encounter(
                 },
                 ..bundle.clone()
             };
-            commands.spawn((bundle, EncounterEntity));
+            commands.spawn((
+                Player {
+                    name: player.name.clone(),
+                },
+                bundle,
+                EncounterEntity,
+            ));
         }
 
         let mut challenger_id = 0usize;
@@ -196,7 +206,14 @@ fn spawn_encounter(
                         },
                         ..bundle.clone()
                     };
-                    commands.spawn((bundle, EncounterEntity));
+                    commands.spawn((
+                        Challenger {
+                            id: challenger_id,
+                            name: challenger.name.clone(),
+                        },
+                        bundle,
+                        EncounterEntity,
+                    ));
                     challenger_id += 1;
                 }
             }

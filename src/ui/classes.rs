@@ -7,6 +7,7 @@ use super::colors::{self, *};
 pub trait IntermediaryNodeBundleHandler {
     fn style(&mut self) -> &mut Style;
     fn background_color(&mut self) -> &mut BackgroundColor;
+    fn border_color(&mut self) -> Option<&mut BorderColor>;
 }
 
 impl IntermediaryNodeBundleHandler for NodeBundle {
@@ -16,6 +17,10 @@ impl IntermediaryNodeBundleHandler for NodeBundle {
 
     fn background_color(&mut self) -> &mut BackgroundColor {
         &mut self.background_color
+    }
+
+    fn border_color(&mut self) -> Option<&mut BorderColor> {
+        Some(&mut self.border_color)
     }
 }
 
@@ -27,6 +32,10 @@ impl IntermediaryNodeBundleHandler for TextBundle {
     fn background_color(&mut self) -> &mut BackgroundColor {
         &mut self.background_color
     }
+
+    fn border_color(&mut self) -> Option<&mut BorderColor> {
+        None
+    }
 }
 
 impl IntermediaryNodeBundleHandler for ButtonBundle {
@@ -37,6 +46,10 @@ impl IntermediaryNodeBundleHandler for ButtonBundle {
     fn background_color(&mut self) -> &mut BackgroundColor {
         &mut self.background_color
     }
+
+    fn border_color(&mut self) -> Option<&mut BorderColor> {
+        Some(&mut self.border_color)
+    }
 }
 
 impl IntermediaryNodeBundleHandler for FocusableButtonBundle {
@@ -46,6 +59,10 @@ impl IntermediaryNodeBundleHandler for FocusableButtonBundle {
 
     fn background_color(&mut self) -> &mut BackgroundColor {
         &mut self.button_bundle.background_color
+    }
+
+    fn border_color(&mut self) -> Option<&mut BorderColor> {
+        Some(&mut self.button_bundle.border_color)
     }
 }
 
@@ -227,17 +244,46 @@ pub fn centered(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().justify_content = JustifyContent::Center;
 }
 
-pub fn card(b: &mut NodeBundle) {
-    b.style.border = UiRect::all(Val::Px(2.));
-    b.border_color.0 = colors::BORDER_COLOR;
-    b.background_color.0 = colors::PRIMARY_BACKGROUND_COLOR;
+pub fn card(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().border = UiRect::all(Val::Px(2.));
+    if let Some(b) = b.border_color() {
+        b.0 = colors::BORDER_COLOR;
+    }
+    b.background_color().0 = colors::CARD_COLOR;
 
-    b.style.display = Display::Grid;
-    b.style.grid_template_rows = vec![
+    b.style().display = Display::Grid;
+    b.style().grid_template_rows = vec![
         GridTrack::fr(1.5),
         GridTrack::max_content(),
         GridTrack::fr(1.),
     ];
+}
+
+pub fn card_prioritized(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::CARD_COLOR_PRIORITIZED;
+}
+pub fn card_focused(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::CARD_COLOR_FOCUSED;
+}
+pub fn card_active(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::CARD_COLOR_ACTIVE;
+}
+pub fn card_blocked(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::CARD_COLOR_BLOCKED;
+}
+
+pub fn apply_card_state(state: FocusState) -> NodeBundle {
+    let mut bundle = NodeBundle::default();
+    card(&mut bundle);
+    primary_box_item(&mut bundle);
+    match state {
+        FocusState::Prioritized => card_prioritized(&mut bundle),
+        FocusState::Focused => card_focused(&mut bundle),
+        FocusState::Active => card_active(&mut bundle),
+        FocusState::Blocked => card_blocked(&mut bundle),
+        FocusState::Inert => {}
+    };
+    bundle
 }
 
 pub fn card_title(b: &mut dyn IntermediaryNodeBundleHandler) {

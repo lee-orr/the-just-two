@@ -1,4 +1,4 @@
-use crate::ui::classes::*;
+use crate::ui::{buttons::focus_button, classes::*};
 use bevy::prelude::*;
 use bevy_ui_dsl::*;
 
@@ -44,7 +44,7 @@ fn setup(
 ) {
     let r = root(c_action_choice_root, &asset_server, &mut commands, |p| {
         for (_entity, choice) in actions.iter() {
-            node(card, p, |p| {
+            focus_button(card.nb(), apply_card_state, p, |p| {
                 node(card_title.nb(), p, |p| {
                     text(choice.title.as_str(), (), (card_title_text, druid_text), p);
                 });

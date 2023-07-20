@@ -56,4 +56,11 @@ fn say_hello_action(mut commands: Commands) {
         success: 10,
         critical_success: 15,
     });
+    commands.spawn(ActionChoice {
+        title: "Goodbye!".to_string(),
+        content: "Say bye".to_string(),
+        fail: 5,
+        success: 8,
+        critical_success: 10,
+    });
 }

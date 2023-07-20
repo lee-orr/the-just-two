@@ -9,27 +9,31 @@ pub trait Roll {
 #[derive(InspectorOptions, Reflect)]
 #[reflect(InspectorOptions)]
 pub enum DiceType {
-    Standard { sides: u8 },
+    D2,
+    D3,
+    D4,
+    D6,
+    D8,
+    D12,
     Static { value: u8 },
 }
 
 impl Default for DiceType {
     fn default() -> Self {
-        Self::Standard { sides: 10 }
+        Self::D12
     }
 }
 
 impl Roll for DiceType {
     fn roll(&self, rng: &mut impl TurboRand) -> u8 {
         match self {
-            DiceType::Standard { sides } => {
-                if *sides > 0 {
-                    rng.sample_iter(1..*sides).unwrap_or(1)
-                } else {
-                    1
-                }
-            }
             DiceType::Static { value } => *value,
+            DiceType::D2 => rng.u8(1..2),
+            DiceType::D3 => rng.u8(1..3),
+            DiceType::D4 => rng.u8(1..4),
+            DiceType::D6 => rng.u8(1..6),
+            DiceType::D8 => rng.u8(1..8),
+            DiceType::D12 => rng.u8(1..12),
         }
     }
 }

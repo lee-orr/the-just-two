@@ -6,6 +6,7 @@ mod encounter_assets;
 mod introduction;
 mod location;
 mod player;
+mod powers;
 mod probability_setup;
 pub mod sequencing;
 
@@ -21,7 +22,7 @@ use bevy_inspector_egui::{
 
 use crate::{
     assets::MainGameAssets,
-    in_game::encounter::{challenger::Challenger, player::Player},
+    in_game::encounter::{challenger::Challenger, player::Player, powers::Power},
     materialized_scene::MaterializedSceneBundle,
 };
 
@@ -177,13 +178,18 @@ fn spawn_encounter(
                 },
                 ..bundle.clone()
             };
-            commands.spawn((
-                Player {
-                    name: player.name.clone(),
-                },
-                bundle,
-                EncounterEntity,
-            ));
+            commands
+                .spawn((
+                    Player {
+                        name: player.name.clone(),
+                    },
+                    bundle,
+                    EncounterEntity,
+                ))
+                .with_children(|p| {
+                    p.spawn(Power::SplitDice);
+                    p.spawn(Power::Advantage);
+                });
         }
 
         let mut challenger_id = 0usize;

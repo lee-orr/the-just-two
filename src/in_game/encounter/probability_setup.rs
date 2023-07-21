@@ -4,7 +4,7 @@ use bevy::{ecs::query::Has, prelude::*};
 use bevy_turborand::{DelegatedRng, GlobalRng};
 
 use super::{
-    actions::{ActionChoice, ActionResult, ChallengerAction},
+    actions::{ActionChoice, ActionResult, ChallengerAction, Resolution},
     dice_pools::*,
     powers::Power,
     sequencing::EncounterState,
@@ -14,7 +14,13 @@ use bevy_ui_dsl::*;
 
 use crate::{
     assets::MainGameAssets,
-    ui::{classes::*, colors, intermediary_node_bundles::*, DisplayBundle},
+    ui::{
+        buttons::{focus_text_button, focused_button_activated, TypedFocusedButtonQuery},
+        classes::*,
+        colors,
+        intermediary_node_bundles::*,
+        DisplayBundle,
+    },
 };
 pub struct ProbabilitySetupPlugin;
 
@@ -28,10 +34,17 @@ impl Plugin for ProbabilitySetupPlugin {
                 OnEnter(EncounterState::ProbabilitySetup),
                 (setup, setup_initial_pools),
             )
-            .add_systems(OnExit(EncounterState::ProbabilitySetup), exit)
+            .add_systems(
+                OnExit(EncounterState::ProbabilitySetup),
+                (resolve_actions, exit),
+            )
             .add_systems(
                 Update,
-                (update_dice_pool_display, update_probability_distibution)
+                (
+                    update_dice_pool_display,
+                    update_probability_distibution,
+                    focused_button_activated.pipe(process_input),
+                )
                     .run_if(in_state(EncounterState::ProbabilitySetup)),
             );
     }
@@ -47,6 +60,9 @@ struct DicePoolControl(Entity);
 struct ProbabilityVisualizer(Entity, Vec<(u8, f32)>);
 
 #[derive(Component)]
+struct ResolveButton;
+
+#[derive(Component)]
 struct UpdatedDicePool;
 
 fn setup(
@@ -58,6 +74,7 @@ fn setup(
 ) {
     let mut dice_pool_controls = Vec::new();
     let mut probability_visualizers = Vec::new();
+    let mut resolve_button = None;
     let r = root(
         c_probability_setup_root,
         &asset_server,
@@ -98,10 +115,22 @@ fn setup(
                 for (_entity, power) in powers.iter() {
                     power.display_bundle(&assets, Val::Px(50.), p);
                 }
+                focus_text_button(
+                    "Resolve!",
+                    (c_button.nb(), primary_box_item.nb()),
+                    apply_button_state,
+                    button_text,
+                    p,
+                )
+                .set(&mut resolve_button);
             });
         },
     );
     commands.entity(r).insert(Screen);
+
+    if let Some(resolve_button) = resolve_button {
+        commands.entity(resolve_button).insert(ResolveButton);
+    }
 
     for (ctl, target) in dice_pool_controls.iter() {
         commands.entity(*ctl).insert(DicePoolControl(*target));
@@ -114,6 +143,7 @@ fn setup(
 }
 
 fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
+    info!("Exiting Probability Resolution");
     for item in query.iter() {
         commands.entity(item).despawn_recursive();
     }
@@ -159,10 +189,30 @@ fn update_dice_pool_display(
     }
 }
 
+fn resolve_actions(
+    mut commands: Commands,
+    dice_pools: Query<&DicePool>,
+    updated_actions: Query<(Entity, &ActionChoice, &Children)>,
+    mut global_rng: ResMut<GlobalRng>,
+) {
+    for (entity, action, dice_pool_entities) in updated_actions.iter() {
+        let dice_pools = dice_pool_entities
+            .iter()
+            .flat_map(|e| dice_pools.get(*e).ok())
+            .collect::<Vec<_>>();
+        let roll = dice_pools.as_slice().roll(global_rng.get_mut());
+        let (result, gap) = action.evaluate(roll);
+        commands
+            .entity(entity)
+            .despawn_descendants()
+            .insert(Resolution { roll, result, gap });
+    }
+}
+
 fn update_probability_distibution(
     mut commands: Commands,
     dice_pools: Query<&DicePool>,
-    updated_actions: Query<(&Children, &ActionChoice), With<UpdatedDicePool>>,
+    updated_actions: Query<(&Children, &ActionChoice)>,
     dice_pool_display: Query<(Entity, &ProbabilityVisualizer)>,
     mut global_rng: ResMut<GlobalRng>,
 ) {
@@ -224,6 +274,20 @@ fn update_probability_distibution(
             })
             .insert(ProbabilityVisualizer(*action_entity, simulation));
     }
+}
+
+fn process_input(
+    In(focused): In<Option<Entity>>,
+    mut commands: Commands,
+    interaction_query: TypedFocusedButtonQuery<'_, '_, '_, ResolveButton>,
+) {
+    let Some(focused) = focused else {
+        return;
+    };
+    let Some((_, _)) = interaction_query.get(focused).ok() else {
+        return;
+    };
+    commands.insert_resource(NextState(Some(EncounterState::OutcomeResolution)));
 }
 
 struct Averager<

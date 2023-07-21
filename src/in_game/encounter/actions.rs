@@ -27,6 +27,8 @@ impl Default for ActionChoice {
     }
 }
 
+#[derive(InspectorOptions, Reflect)]
+#[reflect(InspectorOptions)]
 pub enum ActionResult {
     CriticalFail,
     Fail,
@@ -46,6 +48,14 @@ impl ActionChoice {
             (ActionResult::CriticalSuccess, value - self.critical_success)
         }
     }
+}
+
+#[derive(Component, InspectorOptions, Reflect)]
+#[reflect(InspectorOptions)]
+pub struct Resolution {
+    pub roll: u8,
+    pub result: ActionResult,
+    pub gap: u8,
 }
 
 #[derive(Component)]

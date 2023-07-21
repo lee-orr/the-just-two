@@ -11,6 +11,7 @@ pub struct ActionChoice {
     pub fail: usize,
     pub success: usize,
     pub critical_success: usize,
+    pub dice_pool: InitialPools,
 }
 
 impl Default for ActionChoice {
@@ -21,6 +22,7 @@ impl Default for ActionChoice {
             fail: 2,
             success: 6,
             critical_success: 9,
+            dice_pool: Default::default(),
         }
     }
 }
@@ -34,12 +36,10 @@ pub struct ChallengerAction;
 #[derive(Bundle, Default)]
 pub struct PlayerActionBundle {
     pub action_choice: ActionChoice,
-    pub dice_pool: InitialPools,
 }
 
 #[derive(Bundle, Default)]
 pub struct ChallengerActionBundle {
     pub action_choice: ActionChoice,
-    pub dice_pool: InitialPools,
     pub challenger_action: ChallengerAction,
 }

@@ -1,7 +1,11 @@
-use crate::ui::{
-    buttons::{focus_button, focused_button_activated, TypedFocusedButtonQuery},
-    classes::*,
-    intermediary_node_bundles::*,
+use crate::{
+    assets::MainGameAssets,
+    ui::{
+        buttons::{focus_button, focused_button_activated, TypedFocusedButtonQuery},
+        classes::*,
+        intermediary_node_bundles::*,
+        DisplayBundle,
+    },
 };
 use bevy::prelude::*;
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
@@ -52,6 +56,7 @@ struct ChoiceButton(Entity);
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    assets: Res<MainGameAssets>,
     actions: Query<(Entity, &ActionChoice), Without<ChallengerAction>>,
 ) {
     let mut choices = vec![];
@@ -77,6 +82,11 @@ fn setup(
                             );
                         },
                     );
+                    node(card_dice.nb(), p, |p| {
+                        for dice in choice.dice_pool.iter() {
+                            dice.display_bundle(&assets, Val::Px(30.), p);
+                        }
+                    });
                     node(card_success.nb(), p, |p| {
                         text(
                             format!("{}", choice.critical_success),

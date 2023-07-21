@@ -64,6 +64,7 @@ fn say_challenge_action(mut commands: Commands, challengers: Query<(Entity, &Cha
                     fail: 4,
                     success: 10,
                     critical_success: 15,
+                    ..Default::default()
                 },
                 ..default()
             });

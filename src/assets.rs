@@ -23,6 +23,18 @@ impl Plugin for MainGameAssetPlugin {
 pub struct MainGameAssets {
     #[asset(path = "textures/shadow-gradient.png")]
     pub shadow_gradient: Handle<Image>,
+    #[asset(texture_atlas(
+        tile_size_x = 512.,
+        tile_size_y = 512.,
+        columns = 4,
+        rows = 4,
+        padding_x = 0.,
+        padding_y = 0.,
+        offset_x = 0.,
+        offset_y = 0.
+    ))]
+    #[asset(path = "textures/icons.png")]
+    pub icons: Handle<TextureAtlas>,
     #[asset(path = "music/test.flac")]
     pub menu_music: Handle<AudioSource>,
     #[asset(path = "fonts/ENDOR___.ttf")]

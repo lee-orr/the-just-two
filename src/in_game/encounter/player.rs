@@ -11,6 +11,7 @@ use crate::materialized_scene::MaterializedSceneReference;
 
 use super::{
     actions::{ActionChoice, PlayerActionBundle},
+    dice_pools::{DicePool, DicePoolType, DiceType, InitialPools},
     sequencing::{EncounterState, PublishAvailableActions},
 };
 
@@ -60,6 +61,11 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                     fail: 4,
                     success: 10,
                     critical_success: 15,
+                    dice_pool: InitialPools::new(vec![DicePool {
+                        num_dice: 2,
+                        dice: DiceType::D8,
+                        pool: DicePoolType::Advantage,
+                    }]),
                 },
                 ..default()
             });
@@ -70,6 +76,7 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                     fail: 5,
                     success: 8,
                     critical_success: 10,
+                    ..Default::default()
                 },
                 ..default()
             });

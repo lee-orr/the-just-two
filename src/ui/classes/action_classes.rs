@@ -86,8 +86,14 @@ pub fn card_footer(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.background_color().0 = colors::OVERLAY_COLOR;
 }
 
+pub fn card_dice(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().flex_shrink = 10.;
+    b.style().flex_grow = 0.;
+    b.style().justify_content = JustifyContent::Center;
+    b.style().align_items = AlignItems::Center;
+}
+
 pub fn card_fail(b: &mut dyn IntermediaryNodeBundleHandler) {
-    b.style().grid_column = GridPlacement::start(1).set_span(1);
     b.style().flex_direction = FlexDirection::Row;
     b.style().align_items = AlignItems::FlexEnd;
 }
@@ -98,7 +104,6 @@ pub fn card_content(b: &mut dyn IntermediaryNodeBundleHandler) {
 }
 
 pub fn card_success(b: &mut dyn IntermediaryNodeBundleHandler) {
-    b.style().grid_column = GridPlacement::start(3).set_span(1);
     b.style().flex_direction = FlexDirection::RowReverse;
     b.style().align_items = AlignItems::FlexEnd;
     b.style().column_gap = Val::Px(5.);

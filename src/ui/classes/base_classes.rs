@@ -130,3 +130,11 @@ pub fn span(b: &mut dyn IntermediaryNodeBundleHandler) {
 pub fn centered(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().justify_content = JustifyContent::Center;
 }
+
+pub fn dice_pool_modifier(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().position_type = PositionType::Absolute;
+    b.style().top = Val::Percent(60.);
+    b.style().right = Val::Percent(45.);
+    b.style().width = Val::Percent(50.);
+    b.style().height = Val::Percent(50.);
+}

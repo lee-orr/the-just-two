@@ -236,7 +236,9 @@ fn update_dice_pool_display(
                     continue;
                 };
                 dice_pool_buttons.push((
-                    node((), p, |p| dice_pool.display_bundle(&assets, 40., p)),
+                    focus_button(power_card_container.nb(), apply_power_card_state, p, |p| {
+                        dice_pool.display_bundle(&assets, 40., p)
+                    }),
                     *child,
                 ));
             }

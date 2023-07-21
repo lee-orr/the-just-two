@@ -43,6 +43,7 @@ impl Plugin for ProbabilitySetupPlugin {
                 InGameUpdate,
                 (
                     update_dice_pool_display.before(clear_updated_dice_pool),
+                    update_powers.before(clear_updated_powers),
                     update_probability_distibution,
                     focused_button_activated.pipe(process_input),
                 )
@@ -61,21 +62,26 @@ struct DicePoolControl(Entity);
 struct ProbabilityVisualizer(Entity, Vec<(u8, f32)>);
 
 #[derive(Component)]
+struct PowerContainer;
+
+#[derive(Component)]
 struct ResolveButton;
 
 #[derive(Component)]
 struct UpdatedDicePool;
 
+#[derive(Component)]
+struct UpdatePowers;
+
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     actions: Query<(Entity, &ActionChoice, Has<ChallengerAction>)>,
-    powers: Query<(Entity, &Power)>,
-    assets: Res<MainGameAssets>,
 ) {
     let mut dice_pool_controls = Vec::new();
     let mut probability_visualizers = Vec::new();
     let mut resolve_button = None;
+    let mut power_container = None;
     let r = root(
         c_probability_setup_root,
         &asset_server,
@@ -113,9 +119,7 @@ fn setup(
                 }
             });
             node((probability_power_container, probability_grid), p, |p| {
-                for (_entity, power) in powers.iter() {
-                    power.display_bundle(&assets, Val::Px(50.), p);
-                }
+                node((), p, |_| {}).set(&mut power_container);
                 focus_text_button(
                     "Resolve!",
                     (c_button.nb(), primary_box_item.nb()),
@@ -131,6 +135,11 @@ fn setup(
 
     if let Some(resolve_button) = resolve_button {
         commands.entity(resolve_button).insert(ResolveButton);
+    }
+    if let Some(power_container) = power_container {
+        commands
+            .entity(power_container)
+            .insert((PowerContainer, UpdatePowers));
     }
 
     for (ctl, target) in dice_pool_controls.iter() {
@@ -280,6 +289,35 @@ fn update_probability_distibution(
                 }
             })
             .insert(ProbabilityVisualizer(*action_entity, simulation));
+    }
+}
+
+fn update_powers(
+    mut commands: Commands,
+    power_containers: Query<Entity, With<UpdatePowers>>,
+    powers: Query<(Entity, &Power)>,
+    assets: Res<MainGameAssets>,
+    asset_server: Res<AssetServer>,
+) {
+    for container in power_containers.iter() {
+        let root = root((), &asset_server, &mut commands, |p| {
+            for (_entity, power) in powers.iter() {
+                power.display_bundle(&assets, Val::Px(50.), p);
+            }
+        });
+        commands
+            .entity(container)
+            .despawn_descendants()
+            .add_child(root);
+    }
+}
+
+fn clear_updated_powers(
+    mut commands: Commands,
+    power_containers: Query<Entity, With<UpdatePowers>>,
+) {
+    for entity in power_containers.iter() {
+        commands.entity(entity).remove::<UpdatePowers>();
     }
 }
 

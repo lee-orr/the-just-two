@@ -25,8 +25,8 @@ pub fn probability_card(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.background_color().0 = colors::CARD_COLOR;
 
     b.style().display = Display::Grid;
-    b.style().grid_template_rows = vec![GridTrack::fr(1.), GridTrack::fr(3.)];
-    b.style().height = Val::VMin(15.);
+    b.style().grid_template_rows = vec![GridTrack::fr(1.), GridTrack::fr(1.), GridTrack::fr(3.)];
+    b.style().height = Val::VMin(20.);
     b.style().width = Val::VMin(30.);
 }
 
@@ -52,4 +52,18 @@ pub fn probability_card_title(b: &mut dyn IntermediaryNodeBundleHandler) {
 pub fn probability_card_title_text(_: &AssetServer, t: &mut TextStyle) {
     t.font_size = 20.;
     t.color = colors::PRIMARY_COLOR;
+}
+
+pub fn probability_card_dice_pool_container(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().padding = UiRect::all(Val::Px(5.));
+    b.style().justify_content = JustifyContent::Center;
+    b.style().align_items = AlignItems::Center;
+}
+
+pub fn probability_card_visualizer(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().justify_content = JustifyContent::Center;
+    b.style().align_items = AlignItems::FlexEnd;
+    b.style().flex_direction = FlexDirection::Row;
+    b.style().width = Val::Percent(100.);
+    b.background_color().0 = colors::VISUALIZER_BACKGROUND;
 }

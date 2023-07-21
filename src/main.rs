@@ -17,6 +17,7 @@ use bevy::{
 
 use bevy_inspector_egui::quick::{StateInspectorPlugin, WorldInspectorPlugin};
 
+use bevy_turborand::prelude::RngPlugin;
 use bevy_vector_shapes::Shape2dPlugin;
 use credits::CreditsPlugin;
 use in_game::InGamePlugin;
@@ -48,6 +49,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             Shape2dPlugin::default(),
             WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::F1)),
+            RngPlugin::default(),
         ))
         .insert_resource(ClearColor(ui::colors::SCREEN_BACKGROUND_COLOR))
         .add_plugins((

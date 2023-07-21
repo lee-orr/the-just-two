@@ -17,7 +17,7 @@ pub trait Roll {
     fn roll(&self, rng: &mut impl TurboRand) -> u8;
 }
 
-#[derive(InspectorOptions, Reflect)]
+#[derive(InspectorOptions, Reflect, Clone)]
 #[reflect(InspectorOptions)]
 pub enum DiceType {
     D2,
@@ -39,12 +39,12 @@ impl Roll for DiceType {
     fn roll(&self, rng: &mut impl TurboRand) -> u8 {
         match self {
             DiceType::Static { value } => *value,
-            DiceType::D2 => rng.u8(1..2),
-            DiceType::D3 => rng.u8(1..3),
-            DiceType::D4 => rng.u8(1..4),
-            DiceType::D6 => rng.u8(1..6),
-            DiceType::D8 => rng.u8(1..8),
-            DiceType::D12 => rng.u8(1..12),
+            DiceType::D2 => rng.u8(1..3),
+            DiceType::D3 => rng.u8(1..4),
+            DiceType::D4 => rng.u8(1..5),
+            DiceType::D6 => rng.u8(1..7),
+            DiceType::D8 => rng.u8(1..9),
+            DiceType::D12 => rng.u8(1..13),
         }
     }
 }
@@ -75,7 +75,7 @@ impl DisplayBundle for DiceType {
     }
 }
 
-#[derive(InspectorOptions, Reflect, Default, PartialEq, Eq)]
+#[derive(InspectorOptions, Reflect, Default, PartialEq, Eq, Clone)]
 #[reflect(InspectorOptions)]
 pub enum DicePoolType {
     #[default]
@@ -83,7 +83,7 @@ pub enum DicePoolType {
     Advantage,
 }
 
-#[derive(InspectorOptions, Reflect, Component)]
+#[derive(InspectorOptions, Reflect, Component, Clone)]
 #[reflect(InspectorOptions)]
 pub struct DicePool {
     pub num_dice: u8,
@@ -99,7 +99,7 @@ impl Roll for DicePool {
         match self.pool {
             DicePoolType::Additive => {
                 let mut result = 0;
-                for _ in 1..self.num_dice {
+                for _ in 0..self.num_dice {
                     result += self.dice.roll(rng);
                 }
                 result
@@ -144,7 +144,7 @@ pub struct InitialPools(Vec<DicePool>);
 
 impl Default for InitialPools {
     fn default() -> Self {
-        Self(vec![Default::default()])
+        Self(vec![DicePool::default()])
     }
 }
 
@@ -154,5 +154,50 @@ impl InitialPools {
     }
     pub fn iter(&self) -> impl Iterator<Item = &DicePool> {
         self.0.iter()
+    }
+}
+
+pub trait SimulateDice<const COUNT: usize> {
+    fn simulate(&self, rng: &mut impl TurboRand) -> Vec<(u8, f32)>;
+}
+
+impl<T: Roll, const COUNT: usize> SimulateDice<COUNT> for T {
+    fn simulate(&self, rng: &mut impl TurboRand) -> Vec<(u8, f32)> {
+        let mut raw_results = Vec::with_capacity(COUNT);
+        for _ in 0..COUNT {
+            raw_results.push(self.roll(rng));
+        }
+        raw_results.sort();
+        let (max, counts_by_value) = raw_results.iter().fold(
+            (0usize, Vec::<(u8, usize)>::new()),
+            |(max, mut val), next| {
+                if let Some(last) = val.last_mut() {
+                    if last.0 == *next {
+                        let count = last.1 + 1;
+                        last.1 = count;
+                        return (max.max(count), val);
+                    }
+                }
+                val.push((*next, 1));
+                (max.max(1), val)
+            },
+        );
+
+        let max = max as f32;
+
+        counts_by_value
+            .iter()
+            .map(|(val, count)| (*val, (*count as f32) / max))
+            .collect()
+    }
+}
+
+impl<T: Roll> Roll for &[&T] {
+    fn roll(&self, rng: &mut impl TurboRand) -> u8 {
+        if self.is_empty() {
+            1
+        } else {
+            self.iter().map(|v| v.roll(rng)).sum()
+        }
     }
 }

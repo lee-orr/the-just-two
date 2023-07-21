@@ -8,9 +8,9 @@ use super::dice_pools::InitialPools;
 pub struct ActionChoice {
     pub title: String,
     pub content: String,
-    pub fail: usize,
-    pub success: usize,
-    pub critical_success: usize,
+    pub fail: u8,
+    pub success: u8,
+    pub critical_success: u8,
     pub dice_pool: InitialPools,
 }
 
@@ -23,6 +23,27 @@ impl Default for ActionChoice {
             success: 6,
             critical_success: 9,
             dice_pool: Default::default(),
+        }
+    }
+}
+
+pub enum ActionResult {
+    CriticalFail,
+    Fail,
+    Success,
+    CriticalSuccess,
+}
+
+impl ActionChoice {
+    pub fn evaluate(&self, value: u8) -> (ActionResult, u8) {
+        if value < self.fail {
+            (ActionResult::CriticalFail, self.fail - value)
+        } else if value < self.success {
+            (ActionResult::Fail, self.success - value)
+        } else if value < self.critical_success {
+            (ActionResult::Success, value - self.success)
+        } else {
+            (ActionResult::CriticalSuccess, value - self.critical_success)
         }
     }
 }

@@ -64,10 +64,9 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                     dice_pool: InitialPools::new(vec![DicePool {
                         num_dice: 2,
                         dice: DiceType::D8,
-                        pool: DicePoolType::Advantage,
+                        pool: DicePoolType::Additive,
                     }]),
                 },
-                ..default()
             });
             p.spawn(PlayerActionBundle {
                 action_choice: ActionChoice {
@@ -78,7 +77,6 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                     critical_success: 10,
                     ..Default::default()
                 },
-                ..default()
             });
         });
     }

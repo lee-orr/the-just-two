@@ -2,6 +2,7 @@ use crate::ui::intermediary_node_bundles::IntermediaryNodeBundleHandler;
 
 use super::super::colors;
 use bevy::prelude::*;
+use bevy_ui_navigation::prelude::FocusState;
 
 pub fn c_probability_setup_root(b: &mut NodeBundle) {
     b.style.width = Val::Percent(100.);
@@ -75,4 +76,70 @@ pub fn probability_card_visualizer(b: &mut dyn IntermediaryNodeBundleHandler) {
 pub fn probability_power_container(b: &mut NodeBundle) {
     b.background_color.0 = colors::POWER_TOOLBAR_COLOR;
     b.style.padding = UiRect::all(Val::Px(5.));
+    b.style.row_gap = Val::Px(5.);
+    b.style.column_gap = Val::Px(5.);
+}
+
+pub fn powers_container(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.style().row_gap = Val::Px(5.);
+    b.style().column_gap = Val::Px(5.);
+}
+
+pub fn power_card_container(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR;
+    b.style().padding = UiRect::all(Val::Px(5.));
+}
+
+pub fn power_card_prioritized(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_PRIORITIZED;
+}
+
+pub fn power_card_focused(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_PRIORITIZED;
+}
+
+pub fn power_card_active(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_ACTIVE;
+}
+
+pub fn power_card_blocked(b: &mut dyn IntermediaryNodeBundleHandler) {
+    b.background_color().0 = colors::PRIMARY_COLOR_BLOCKED;
+}
+
+pub fn apply_power_card_state(state: FocusState) -> NodeBundle {
+    let mut bundle = NodeBundle::default();
+    power_card_container(&mut bundle);
+    match state {
+        FocusState::Prioritized => power_card_prioritized(&mut bundle),
+        FocusState::Focused => power_card_focused(&mut bundle),
+        FocusState::Active => power_card_active(&mut bundle),
+        FocusState::Blocked => power_card_blocked(&mut bundle),
+        FocusState::Inert => {}
+    };
+    bundle
+}
+
+pub fn apply_action_state(state: FocusState) -> NodeBundle {
+    let mut bundle = NodeBundle::default();
+    probability_card(&mut bundle);
+    match state {
+        FocusState::Prioritized => power_card_prioritized(&mut bundle),
+        FocusState::Focused => power_card_focused(&mut bundle),
+        FocusState::Active => power_card_active(&mut bundle),
+        FocusState::Blocked => power_card_blocked(&mut bundle),
+        FocusState::Inert => {}
+    };
+    bundle
+}
+
+pub fn apply_action_state_ch(state: FocusState) -> NodeBundle {
+    let mut result = apply_action_state(state);
+    challenger_card(&mut result);
+    result
+}
+
+pub fn apply_action_state_pl(state: FocusState) -> NodeBundle {
+    let mut result = apply_action_state(state);
+    player_card(&mut result);
+    result
 }

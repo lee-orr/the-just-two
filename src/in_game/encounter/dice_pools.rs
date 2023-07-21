@@ -17,7 +17,7 @@ pub trait Roll {
     fn roll(&self, rng: &mut impl TurboRand) -> u8;
 }
 
-#[derive(InspectorOptions, Reflect, Clone)]
+#[derive(InspectorOptions, Reflect, Clone, Copy, PartialEq, Eq)]
 #[reflect(InspectorOptions)]
 pub enum DiceType {
     D2,
@@ -50,7 +50,7 @@ impl Roll for DiceType {
 }
 
 impl DisplayBundle for DiceType {
-    fn display_bundle(&self, assets: &MainGameAssets, icon_size: Val, parent: &mut UiChildBuilder) {
+    fn display_bundle(&self, assets: &MainGameAssets, icon_size: f32, parent: &mut UiChildBuilder) {
         let (is_atlas, position) = match self {
             DiceType::D2 => (true, 0),
             DiceType::D3 => (true, 1),
@@ -67,74 +67,87 @@ impl DisplayBundle for DiceType {
                 format!("+{position}"),
                 TextStyle {
                     font: assets.druids_font.clone(),
-                    font_size: 30.,
-                    color: colors::PRIMARY_BUTTON_TEXT,
+                    font_size: 20.,
+                    color: colors::CRITICAL_COLOR,
                 },
             ));
         }
     }
 }
 
-#[derive(InspectorOptions, Reflect, Default, PartialEq, Eq, Clone)]
+#[derive(InspectorOptions, Reflect, Default, PartialEq, Eq, Clone, Copy)]
 #[reflect(InspectorOptions)]
 pub enum DicePoolType {
     #[default]
-    Additive,
+    Single,
     Advantage,
 }
 
-#[derive(InspectorOptions, Reflect, Component, Clone)]
+#[derive(InspectorOptions, Reflect, Component, Clone, Copy, Default)]
 #[reflect(InspectorOptions)]
 pub struct DicePool {
-    pub num_dice: u8,
     pub dice: DiceType,
     pub pool: DicePoolType,
 }
 
-impl Roll for DicePool {
-    fn roll(&self, rng: &mut impl TurboRand) -> u8 {
-        if self.num_dice == 0 {
-            return 1;
+impl DicePool {
+    pub fn new(dice: DiceType) -> Self {
+        Self {
+            dice,
+            ..Default::default()
         }
-        match self.pool {
-            DicePoolType::Additive => {
-                let mut result = 0;
-                for _ in 0..self.num_dice {
-                    result += self.dice.roll(rng);
-                }
-                result
-            }
-            DicePoolType::Advantage => {
-                let mut result = 1;
-                for _ in 1..self.num_dice {
-                    result = result.max(self.dice.roll(rng));
-                }
-                result
-            }
-        }
+    }
+
+    pub fn d2() -> Self {
+        Self::new(DiceType::D2)
+    }
+
+    pub fn d3() -> Self {
+        Self::new(DiceType::D4)
+    }
+
+    pub fn d4() -> Self {
+        Self::new(DiceType::D4)
+    }
+
+    pub fn d6() -> Self {
+        Self::new(DiceType::D6)
+    }
+
+    pub fn d8() -> Self {
+        Self::new(DiceType::D8)
+    }
+    pub fn d12() -> Self {
+        Self::new(DiceType::D12)
+    }
+
+    pub fn bonus(value: u8) -> Self {
+        Self::new(DiceType::Static { value })
+    }
+
+    pub fn advantage(mut self) -> Self {
+        self.pool = DicePoolType::Advantage;
+        self
     }
 }
 
-impl Default for DicePool {
-    fn default() -> Self {
-        Self {
-            num_dice: 1,
-            dice: Default::default(),
-            pool: Default::default(),
+impl Roll for DicePool {
+    fn roll(&self, rng: &mut impl TurboRand) -> u8 {
+        match self.pool {
+            DicePoolType::Single => self.dice.roll(rng),
+            DicePoolType::Advantage => self.dice.roll(rng).max(self.dice.roll(rng)),
         }
     }
 }
 
 impl DisplayBundle for DicePool {
-    fn display_bundle(&self, assets: &MainGameAssets, icon_size: Val, parent: &mut UiChildBuilder) {
+    fn display_bundle(&self, assets: &MainGameAssets, icon_size: f32, parent: &mut UiChildBuilder) {
         if DicePoolType::Advantage == self.pool {
             node(dice_pool_modifier.nb(), parent, |p| {
                 Power::Advantage.display_bundle(assets, icon_size, p);
             });
         }
-        for _ in 0..self.num_dice {
-            self.dice.display_bundle(assets, icon_size, parent);
-        }
+        self.dice.display_bundle(assets, icon_size, parent);
     }
 }
 

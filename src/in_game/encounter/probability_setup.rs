@@ -1,12 +1,14 @@
 use std::{iter::Peekable, ops::Div};
 
 use bevy::{ecs::query::Has, prelude::*};
+use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 use bevy_turborand::{DelegatedRng, GlobalRng};
+use bevy_ui_navigation::prelude::{FocusState, Focusable};
 
 use super::{
     actions::{ActionChoice, ActionResult, ChallengerAction, Resolution},
     dice_pools::*,
-    powers::Power,
+    powers::{Power, PowerTargetingType},
     sequencing::EncounterState,
 };
 
@@ -16,7 +18,9 @@ use crate::{
     assets::MainGameAssets,
     in_game::InGameUpdate,
     ui::{
-        buttons::{focus_text_button, focused_button_activated, TypedFocusedButtonQuery},
+        buttons::{
+            focus_button, focus_text_button, focused_button_activated, TypedFocusedButtonQuery,
+        },
         classes::*,
         colors,
         intermediary_node_bundles::*,
@@ -31,6 +35,10 @@ impl Plugin for ProbabilitySetupPlugin {
             .register_type::<DicePoolType>()
             .register_type::<DicePool>()
             .register_type::<InitialPools>()
+            .register_type::<PowerTargetingType>()
+            .register_type::<Power>()
+            .register_type::<TargetingTypes>()
+            .register_type::<Buttons>()
             .add_systems(
                 OnEnter(EncounterState::ProbabilitySetup),
                 (setup, setup_initial_pools),
@@ -44,7 +52,10 @@ impl Plugin for ProbabilitySetupPlugin {
                 (
                     update_dice_pool_display.before(clear_updated_dice_pool),
                     update_powers.before(clear_updated_powers),
+                    clear_updated_dice_pool,
+                    clear_updated_powers,
                     update_probability_distibution,
+                    update_current_focusables,
                     focused_button_activated.pipe(process_input),
                 )
                     .run_if(in_state(EncounterState::ProbabilitySetup)),
@@ -64,8 +75,25 @@ struct ProbabilityVisualizer(Entity, Vec<(u8, f32)>);
 #[derive(Component)]
 struct PowerContainer;
 
-#[derive(Component)]
-struct ResolveButton;
+#[derive(Component, InspectorOptions, Reflect, Default)]
+enum Buttons {
+    #[default]
+    Resolve,
+    Power(Entity),
+    Pool {
+        pool: Entity,
+        action: Entity,
+    },
+    Action(Entity),
+}
+
+#[derive(Resource, Reflect, InspectorOptions, Default)]
+#[reflect(Resource, InspectorOptions)]
+enum TargetingTypes {
+    #[default]
+    SelectPower,
+    PowerTarget(PowerTargetingType, Entity, Power),
+}
 
 #[derive(Component)]
 struct UpdatedDicePool;
@@ -78,8 +106,10 @@ fn setup(
     asset_server: Res<AssetServer>,
     actions: Query<(Entity, &ActionChoice, Has<ChallengerAction>)>,
 ) {
+    commands.insert_resource(TargetingTypes::SelectPower);
     let mut dice_pool_controls = Vec::new();
     let mut probability_visualizers = Vec::new();
+    let mut action_buttons = Vec::new();
     let mut resolve_button = None;
     let mut power_container = None;
     let r = root(
@@ -89,33 +119,44 @@ fn setup(
         |p| {
             node(probability_grid, p, |p| {
                 for (entity, choice, is_challenger) in actions.iter() {
-                    node(
-                        (
-                            probability_card.nb(),
+                    action_buttons.push((
+                        focus_button(
+                            (
+                                probability_card.nb(),
+                                if is_challenger {
+                                    challenger_card.nb()
+                                } else {
+                                    player_card.nb()
+                                },
+                            ),
                             if is_challenger {
-                                challenger_card.nb()
+                                apply_action_state_ch
                             } else {
-                                player_card.nb()
+                                apply_action_state_pl
+                            },
+                            p,
+                            |p| {
+                                node(probability_card_title.nb(), p, |p| {
+                                    text(
+                                        choice.title.as_str(),
+                                        (),
+                                        (probability_card_title_text, druid_text),
+                                        p,
+                                    );
+                                });
+
+                                dice_pool_controls.push((
+                                    node(probability_card_dice_pool_container.nb(), p, |_| {}),
+                                    entity,
+                                ));
+                                probability_visualizers.push((
+                                    node(probability_card_visualizer.nb(), p, |_| {}),
+                                    entity,
+                                ));
                             },
                         ),
-                        p,
-                        |p| {
-                            node(probability_card_title.nb(), p, |p| {
-                                text(
-                                    choice.title.as_str(),
-                                    (),
-                                    (probability_card_title_text, druid_text),
-                                    p,
-                                );
-                            });
-                            dice_pool_controls.push((
-                                node(probability_card_dice_pool_container.nb(), p, |_| {}),
-                                entity,
-                            ));
-                            probability_visualizers
-                                .push((node(probability_card_visualizer.nb(), p, |_| {}), entity));
-                        },
-                    );
+                        entity,
+                    ));
                 }
             });
             node((probability_power_container, probability_grid), p, |p| {
@@ -134,7 +175,7 @@ fn setup(
     commands.entity(r).insert(Screen);
 
     if let Some(resolve_button) = resolve_button {
-        commands.entity(resolve_button).insert(ResolveButton);
+        commands.entity(resolve_button).insert(Buttons::Resolve);
     }
     if let Some(power_container) = power_container {
         commands
@@ -149,6 +190,9 @@ fn setup(
         commands
             .entity(*ctl)
             .insert(ProbabilityVisualizer(*target, vec![]));
+    }
+    for (ctl, target) in action_buttons.iter() {
+        commands.entity(*ctl).insert(Buttons::Action(*target));
     }
 }
 
@@ -166,7 +210,7 @@ fn setup_initial_pools(mut commands: Commands, query: Query<(Entity, &ActionChoi
             .insert(UpdatedDicePool)
             .with_children(|p| {
                 for pool in choice.dice_pool.iter() {
-                    p.spawn(pool.clone());
+                    p.spawn(*pool);
                 }
             });
     }
@@ -184,18 +228,30 @@ fn update_dice_pool_display(
         let Ok(dice_pool_entities) = updated_actions.get(*action_entity) else {
             continue;
         };
+        let mut dice_pool_buttons = Vec::new();
+
         let dice_pool_root = root((), &asset_server, &mut commands, |p| {
             for child in dice_pool_entities.iter() {
                 let Ok(dice_pool) = dice_pools.get(*child) else {
                     continue;
                 };
-                dice_pool.display_bundle(&assets, Val::Px(20.), p);
+                dice_pool_buttons.push((
+                    node((), p, |p| dice_pool.display_bundle(&assets, 40., p)),
+                    *child,
+                ));
             }
         });
         commands
             .entity(display_entity)
             .despawn_descendants()
             .add_child(dice_pool_root);
+
+        for (button, pool) in dice_pool_buttons.iter() {
+            commands.entity(*button).insert(Buttons::Pool {
+                pool: *pool,
+                action: *action_entity,
+            });
+        }
     }
 }
 
@@ -299,16 +355,28 @@ fn update_powers(
     assets: Res<MainGameAssets>,
     asset_server: Res<AssetServer>,
 ) {
+    let mut power_buttons = Vec::new();
     for container in power_containers.iter() {
-        let root = root((), &asset_server, &mut commands, |p| {
-            for (_entity, power) in powers.iter() {
-                power.display_bundle(&assets, Val::Px(50.), p);
+        info!("Updating Powers");
+        let root = root(powers_container.nb(), &asset_server, &mut commands, |p| {
+            for (entity, power) in powers.iter() {
+                power_buttons.push((
+                    focus_button(power_card_container.nb(), apply_power_card_state, p, |p| {
+                        power.display_bundle(&assets, 50., p);
+                    }),
+                    entity,
+                ));
             }
         });
         commands
             .entity(container)
             .despawn_descendants()
             .add_child(root);
+    }
+
+    for (button, power) in power_buttons.iter() {
+        info!("Adding button power");
+        commands.entity(*button).insert(Buttons::Power(*power));
     }
 }
 
@@ -317,6 +385,7 @@ fn clear_updated_powers(
     power_containers: Query<Entity, With<UpdatePowers>>,
 ) {
     for entity in power_containers.iter() {
+        info!("Clear Powers");
         commands.entity(entity).remove::<UpdatePowers>();
     }
 }
@@ -324,15 +393,89 @@ fn clear_updated_powers(
 fn process_input(
     In(focused): In<Option<Entity>>,
     mut commands: Commands,
-    interaction_query: TypedFocusedButtonQuery<'_, '_, '_, ResolveButton>,
+    interaction_query: TypedFocusedButtonQuery<'_, '_, '_, Buttons>,
+    powers: Query<&Power>,
 ) {
     let Some(focused) = focused else {
         return;
     };
-    let Some((_, _)) = interaction_query.get(focused).ok() else {
+    let Some((_, btn)) = interaction_query.get(focused).ok() else {
         return;
     };
-    commands.insert_resource(NextState(Some(EncounterState::OutcomeResolution)));
+
+    match btn {
+        Buttons::Resolve => {
+            commands.insert_resource(NextState(Some(EncounterState::OutcomeResolution)));
+        }
+        Buttons::Power(power_entity) => {
+            if let Ok(power) = powers.get(*power_entity) {
+                commands.insert_resource(TargetingTypes::PowerTarget(
+                    power.targets(),
+                    *power_entity,
+                    *power,
+                ));
+            }
+        }
+        Buttons::Pool { pool: _, action: _ } => {}
+        Buttons::Action(_) => {}
+    }
+}
+
+fn update_current_focusables(
+    mut buttons: Query<(&Buttons, &mut Focusable)>,
+    targeting: Option<Res<TargetingTypes>>,
+) {
+    let Some(targeting) = targeting else {
+        return;
+    };
+
+    match targeting.as_ref() {
+        TargetingTypes::SelectPower => {
+            for (button, mut focusable) in buttons.iter_mut() {
+                let focus = matches!(button, Buttons::Resolve | Buttons::Power(_));
+                let is_focusable = focusable.state() != FocusState::Blocked;
+                if focus != is_focusable {
+                    info!("Update focusable - {is_focusable} to {focus}");
+                    if focus {
+                        focusable.unblock();
+                    } else {
+                        focusable.block();
+                    }
+                }
+            }
+        }
+        TargetingTypes::PowerTarget(targeting_type, _, _) => match targeting_type {
+            PowerTargetingType::Action => {
+                for (button, mut focusable) in buttons.iter_mut() {
+                    let focus = matches!(button, Buttons::Resolve | Buttons::Action(_));
+                    let is_focusable = focusable.state() != FocusState::Blocked;
+                    if focus != is_focusable {
+                        if focus {
+                            focusable.unblock();
+                        } else {
+                            focusable.block();
+                        }
+                    }
+                }
+            }
+            _ => {
+                for (button, mut focusable) in buttons.iter_mut() {
+                    let focus = matches!(
+                        button,
+                        Buttons::Resolve | Buttons::Pool { pool: _, action: _ }
+                    );
+                    let is_focusable = focusable.state() != FocusState::Blocked;
+                    if focus != is_focusable {
+                        if focus {
+                            focusable.unblock();
+                        } else {
+                            focusable.block();
+                        }
+                    }
+                }
+            }
+        },
+    };
 }
 
 struct Averager<

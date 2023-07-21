@@ -28,10 +28,11 @@ impl Plugin for UiPlugin {
 }
 
 pub trait DisplayBundle {
-    fn display_bundle(&self, assets: &MainGameAssets, icon_size: Val, parent: &mut UiChildBuilder);
+    fn display_bundle(&self, assets: &MainGameAssets, icon_size: f32, parent: &mut UiChildBuilder);
 }
 
-pub fn spawn_icon(index: usize, assets: &MainGameAssets, icon_size: Val) -> impl Bundle {
+pub fn spawn_icon(index: usize, assets: &MainGameAssets, icon_size: f32) -> impl Bundle {
+    let icon_size = Val::Px(icon_size);
     AtlasImageBundle {
         texture_atlas: assets.icons.clone(),
         texture_atlas_image: UiTextureAtlasImage { index, ..default() },

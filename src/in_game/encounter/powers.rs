@@ -7,9 +7,9 @@ use crate::{
     ui::{colors, spawn_icon, DisplayBundle},
 };
 
-use super::dice_pools::DiceType;
+use super::dice_pools::{DicePool, DicePoolType, DiceType};
 
-#[derive(Component, InspectorOptions, Reflect)]
+#[derive(Component, InspectorOptions, Reflect, Clone, Copy)]
 #[reflect(InspectorOptions)]
 pub enum Power {
     SplitDice,
@@ -23,7 +23,75 @@ pub enum Power {
     // ReRoll,
 }
 
-impl Power {}
+#[derive(InspectorOptions, Reflect, Default)]
+#[reflect(InspectorOptions)]
+pub enum PowerTargetingType {
+    #[default]
+    Single,
+    UpToX(u8),
+    Action,
+}
+
+impl Power {
+    pub fn targets(&self) -> PowerTargetingType {
+        match self {
+            Power::AddDice(_) => PowerTargetingType::Action,
+            Power::StaticBonus(_) => PowerTargetingType::Action,
+            _ => PowerTargetingType::Single,
+        }
+    }
+
+    pub fn valid_targets(&self, input: &[&DicePool]) -> bool {
+        match self {
+            Power::SplitDice => {
+                input.len() == 1
+                    && if let Some(first) = input.first() {
+                        first.dice != DiceType::D2 && first.dice != DiceType::D3
+                    } else {
+                        false
+                    }
+            }
+            Power::AddDice(_) => input.is_empty(),
+            Power::Advantage => {
+                input.len() == 1
+                    && if let Some(DicePool { dice, pool }) = input.first() {
+                        if *pool == DicePoolType::Advantage {
+                            return false;
+                        }
+                        !matches!(dice, DiceType::Static { value: _ })
+                    } else {
+                        true
+                    }
+            }
+            Power::StaticBonus(_) => input.is_empty(),
+        }
+    }
+
+    pub fn apply(&self, input: &[&DicePool]) -> Vec<DicePool> {
+        match self {
+            Power::SplitDice => input
+                .iter()
+                .flat_map(|v| {
+                    let (count, dice) = match v.dice {
+                        DiceType::D4 => (2usize, DiceType::D2),
+                        DiceType::D6 => (2, DiceType::D3),
+                        DiceType::D8 => (2, DiceType::D4),
+                        DiceType::D12 => (2, DiceType::D6),
+                        _ => (1, v.dice),
+                    };
+                    let pool = v.pool;
+
+                    (0..count)
+                        .map(|_| DicePool { dice, pool })
+                        .collect::<Vec<_>>()
+                })
+                .collect(),
+            Power::AddDice(d) => vec![DicePool::new(*d)],
+            Power::Advantage => input.iter().map(|v| (**v).advantage()).collect(),
+            Power::StaticBonus(v) => vec![DicePool::bonus(*v)],
+        }
+    }
+}
 
 impl Default for Power {
     fn default() -> Self {
@@ -32,7 +100,7 @@ impl Default for Power {
 }
 
 impl DisplayBundle for Power {
-    fn display_bundle(&self, assets: &MainGameAssets, icon_size: Val, parent: &mut UiChildBuilder) {
+    fn display_bundle(&self, assets: &MainGameAssets, icon_size: f32, parent: &mut UiChildBuilder) {
         match self {
             Power::SplitDice => {
                 parent.spawn(spawn_icon(8, assets, icon_size));

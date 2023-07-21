@@ -85,7 +85,7 @@ fn setup(
                     );
                     node(card_dice.nb(), p, |p| {
                         for dice in choice.dice_pool.iter() {
-                            dice.display_bundle(&assets, Val::Px(30.), p);
+                            dice.display_bundle(&assets, 40., p);
                         }
                     });
                     node(card_success.nb(), p, |p| {

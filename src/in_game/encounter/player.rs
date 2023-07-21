@@ -61,11 +61,20 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                     fail: 4,
                     success: 10,
                     critical_success: 15,
-                    dice_pool: InitialPools::new(vec![DicePool {
-                        num_dice: 2,
-                        dice: DiceType::D8,
-                        pool: DicePoolType::Additive,
-                    }]),
+                    dice_pool: InitialPools::new(vec![
+                        DicePool {
+                            dice: DiceType::D8,
+                            pool: DicePoolType::Single,
+                        },
+                        DicePool {
+                            dice: DiceType::D8,
+                            pool: DicePoolType::Single,
+                        },
+                        DicePool {
+                            dice: DiceType::Static { value: 2 },
+                            pool: DicePoolType::Single,
+                        },
+                    ]),
                 },
             });
             p.spawn(PlayerActionBundle {
@@ -75,11 +84,16 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                     fail: 5,
                     success: 8,
                     critical_success: 10,
-                    dice_pool: InitialPools::new(vec![DicePool {
-                        num_dice: 5,
-                        dice: DiceType::D6,
-                        pool: DicePoolType::Additive,
-                    }]),
+                    dice_pool: InitialPools::new(vec![
+                        DicePool {
+                            dice: DiceType::D6,
+                            pool: DicePoolType::Advantage,
+                        },
+                        DicePool {
+                            dice: DiceType::D8,
+                            pool: DicePoolType::Single,
+                        },
+                    ]),
                 },
             });
         });

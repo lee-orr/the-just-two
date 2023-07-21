@@ -75,7 +75,11 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                     fail: 5,
                     success: 8,
                     critical_success: 10,
-                    ..Default::default()
+                    dice_pool: InitialPools::new(vec![DicePool {
+                        num_dice: 5,
+                        dice: DiceType::D6,
+                        pool: DicePoolType::Additive,
+                    }]),
                 },
             });
         });

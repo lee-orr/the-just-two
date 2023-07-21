@@ -236,7 +236,7 @@ fn update_probability_distibution(
         let simulation =
             SimulateDice::<100>::simulate(&dice_pools.as_slice(), global_rng.get_mut());
 
-        let simulation = Averager::<'_, _, _, 1, 10>(
+        let simulation = Averager::<'_, _, _, 1, 20>(
             simulation.iter().peekable(),
             stored_simulation.iter().peekable(),
         )
@@ -269,8 +269,8 @@ fn update_probability_distibution(
                                 height: Val::Percent(100.),
                                 position_type: PositionType::Absolute,
                                 top: Val::Px(0.),
-                                left: Val::Px(-1.),
-                                right: Val::Px(-1.),
+                                left: Val::Px(1.5),
+                                right: Val::Px(1.5),
                                 ..Default::default()
                             },
                             background_color: BackgroundColor(result_type),

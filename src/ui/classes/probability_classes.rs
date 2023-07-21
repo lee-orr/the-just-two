@@ -7,10 +7,12 @@ pub fn c_probability_setup_root(b: &mut NodeBundle) {
     b.style.width = Val::Percent(100.);
     b.style.height = Val::Percent(100.);
     b.style.display = Display::Flex;
-    b.style.flex_direction = FlexDirection::Row;
-    b.style.justify_content = JustifyContent::Center;
-    b.style.align_items = AlignItems::End;
+    b.style.flex_direction = FlexDirection::Column;
+    b.style.justify_content = JustifyContent::FlexEnd;
+    b.style.align_items = AlignItems::Center;
     b.style.padding = UiRect::all(Val::Px(30.));
+    b.style.row_gap = Val::Px(5.);
+    b.style.column_gap = Val::Px(5.);
 }
 
 pub fn probability_grid(b: &mut NodeBundle) {
@@ -18,6 +20,8 @@ pub fn probability_grid(b: &mut NodeBundle) {
     b.style.flex_wrap = FlexWrap::Wrap;
     b.style.row_gap = Val::Px(5.);
     b.style.column_gap = Val::Px(5.);
+    b.style.flex_direction = FlexDirection::Row;
+    b.style.justify_content = JustifyContent::Center;
 }
 
 pub fn probability_card(b: &mut dyn IntermediaryNodeBundleHandler) {
@@ -66,4 +70,9 @@ pub fn probability_card_visualizer(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().flex_direction = FlexDirection::Row;
     b.style().width = Val::Percent(100.);
     b.background_color().0 = colors::VISUALIZER_BACKGROUND;
+}
+
+pub fn probability_power_container(b: &mut NodeBundle) {
+    b.background_color.0 = colors::POWER_TOOLBAR_COLOR;
+    b.style.padding = UiRect::all(Val::Px(5.));
 }

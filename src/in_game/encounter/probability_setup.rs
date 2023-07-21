@@ -6,6 +6,7 @@ use bevy_turborand::{DelegatedRng, GlobalRng};
 use super::{
     actions::{ActionChoice, ActionResult, ChallengerAction},
     dice_pools::*,
+    powers::Power,
     sequencing::EncounterState,
 };
 
@@ -52,6 +53,8 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     actions: Query<(Entity, &ActionChoice, Has<ChallengerAction>)>,
+    powers: Query<(Entity, &Power)>,
+    assets: Res<MainGameAssets>,
 ) {
     let mut dice_pool_controls = Vec::new();
     let mut probability_visualizers = Vec::new();
@@ -89,6 +92,11 @@ fn setup(
                                 .push((node(probability_card_visualizer.nb(), p, |_| {}), entity));
                         },
                     );
+                }
+            });
+            node((probability_power_container, probability_grid), p, |p| {
+                for (_entity, power) in powers.iter() {
+                    power.display_bundle(&assets, Val::Px(50.), p);
                 }
             });
         },

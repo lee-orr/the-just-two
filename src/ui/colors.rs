@@ -26,3 +26,4 @@ pub const CARD_COLOR_ACTIVE: Color = Color::rgb(0.18, 0.38, 0.32);
 pub const CARD_COLOR_BLOCKED: Color = Color::rgb(0.4, 0.3, 0.4);
 
 pub const VISUALIZER_BACKGROUND: Color = Color::rgba(0.9, 0.9, 0.9, 0.3);
+pub const POWER_TOOLBAR_COLOR: Color = Color::rgba(0.83, 0.95, 0.83, 0.3);

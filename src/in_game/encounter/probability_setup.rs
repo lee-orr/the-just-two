@@ -14,6 +14,7 @@ use bevy_ui_dsl::*;
 
 use crate::{
     assets::MainGameAssets,
+    in_game::InGameUpdate,
     ui::{
         buttons::{focus_text_button, focused_button_activated, TypedFocusedButtonQuery},
         classes::*,
@@ -39,9 +40,9 @@ impl Plugin for ProbabilitySetupPlugin {
                 (resolve_actions, exit),
             )
             .add_systems(
-                Update,
+                InGameUpdate,
                 (
-                    update_dice_pool_display,
+                    update_dice_pool_display.before(clear_updated_dice_pool),
                     update_probability_distibution,
                     focused_button_activated.pipe(process_input),
                 )
@@ -186,6 +187,12 @@ fn update_dice_pool_display(
             .entity(display_entity)
             .despawn_descendants()
             .add_child(dice_pool_root);
+    }
+}
+
+fn clear_updated_dice_pool(mut commands: Commands, actions: Query<Entity, With<UpdatedDicePool>>) {
+    for action in actions.iter() {
+        commands.entity(action).remove::<UpdatedDicePool>();
     }
 }
 

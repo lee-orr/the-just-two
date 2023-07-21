@@ -39,7 +39,7 @@ use self::{
     sequencing::EncounterState,
 };
 
-use super::{factions::Faction, game_state::GameState};
+use super::{factions::Faction, game_state::GameState, InGameUpdate};
 
 pub use self::challenger::Challengers;
 pub use self::location::Locations;
@@ -72,7 +72,7 @@ impl Plugin for EncounterPlugin {
             .add_systems(OnEnter(EncounterState::Introduction), spawn_encounter)
             .add_systems(OnEnter(EncounterState::None), despawn_encounter)
             .add_systems(
-                Update,
+                InGameUpdate,
                 start_encounter.run_if(
                     in_state(EncounterState::None)
                         .and_then(resource_exists::<EncounterSetup>())

@@ -4,7 +4,7 @@ use bevy_ui_dsl::*;
 use bevy_ui_navigation::prelude::Focusable;
 
 use crate::{
-    in_game::game_state::GameState,
+    in_game::{game_state::GameState, InGameUpdate},
     ui::{
         buttons::{focus_text_button, focused_button_activated},
         classes::*,
@@ -21,7 +21,7 @@ impl Plugin for IntroductionPlugin {
             .add_systems(OnEnter(EncounterState::Introduction), set_loaded_text)
             .add_systems(OnExit(EncounterState::Introduction), exit)
             .add_systems(
-                Update,
+                InGameUpdate,
                 (focused_button_activated.pipe(process_input))
                     .run_if(in_state(EncounterState::Introduction)),
             );

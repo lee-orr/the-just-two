@@ -1,5 +1,6 @@
 use crate::{
     assets::MainGameAssets,
+    in_game::InGameUpdate,
     ui::{
         buttons::{focus_button, focused_button_activated, TypedFocusedButtonQuery},
         classes::*,
@@ -39,7 +40,7 @@ impl Plugin for ActionChoicePlugin {
             )
             .add_systems(OnExit(EncounterState::ActionChoice), exit)
             .add_systems(
-                Update,
+                InGameUpdate,
                 (focused_button_activated.pipe(process_input))
                     .run_if(in_state(EncounterState::ActionChoice)),
             );

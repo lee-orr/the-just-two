@@ -44,7 +44,7 @@ impl DisplayBundle for Power {
                     })
                     .with_children(|p| {
                         p.spawn(TextBundle::from_section(
-                            format!("+"),
+                            "+".to_string(),
                             TextStyle {
                                 font: assets.knights_font.clone(),
                                 font_size: 40.,

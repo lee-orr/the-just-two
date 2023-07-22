@@ -21,6 +21,13 @@ use crate::{
         DisplayBundle,
     },
 };
+
+mod dice_pools;
+
+mod handle_powers;
+
+mod iter_averager;
+
 pub struct ProbabilitySetupPlugin;
 
 impl Plugin for ProbabilitySetupPlugin {
@@ -199,8 +206,6 @@ fn exit(mut commands: Commands, query: Query<Entity, With<Screen>>) {
     }
 }
 
-mod dice_pools;
-
 fn resolve_actions(
     mut commands: Commands,
     dice_pools: Query<&DicePool>,
@@ -220,7 +225,3 @@ fn resolve_actions(
             .insert(Resolution { roll, result, gap });
     }
 }
-
-mod handle_powers;
-
-mod iter_averager;

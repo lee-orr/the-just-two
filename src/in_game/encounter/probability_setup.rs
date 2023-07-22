@@ -51,6 +51,7 @@ impl Plugin for ProbabilitySetupPlugin {
                     handle_powers::clear_updated_powers,
                     dice_pools::update_probability_distibution,
                     handle_powers::update_current_focusables,
+                    handle_powers::update_resolve_button,
                     focused_button_activated.pipe(handle_powers::process_input),
                 )
                     .run_if(in_state(EncounterState::ProbabilitySetup)),
@@ -70,7 +71,7 @@ struct ProbabilityVisualizer(Entity, Vec<(u8, f32)>);
 #[derive(Component)]
 pub struct PowerContainer;
 
-#[derive(Component, InspectorOptions, Reflect, Default)]
+#[derive(Component, InspectorOptions, Reflect, Default, PartialEq, Eq)]
 pub enum Buttons {
     #[default]
     Resolve,

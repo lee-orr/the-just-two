@@ -4,6 +4,30 @@ use bevy_ui_navigation::prelude::{FocusState, Focusable};
 
 use super::*;
 
+pub(crate) fn update_resolve_button(
+    mut texts: Query<&mut Text>,
+    button: Query<(&Children, &Buttons)>,
+    targeting: Res<TargetingTypes>,
+) {
+    if targeting.is_changed() {
+        for (children, buttons) in button.iter() {
+            if buttons == &Buttons::Resolve {
+                for child in children.iter() {
+                    if let Ok(mut text) = texts.get_mut(*child) {
+                        let label = match targeting.as_ref() {
+                            TargetingTypes::SelectPower => "Resolve",
+                            TargetingTypes::PowerTarget(_, _, _) => "De-Select",
+                        };
+                        if let Some(section) = text.sections.get_mut(0) {
+                            section.value = label.to_string();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub(crate) fn process_input(
     In(focused): In<Option<Entity>>,
     mut commands: Commands,
@@ -28,7 +52,11 @@ pub(crate) fn process_input(
 
     match btn {
         Buttons::Resolve => {
-            commands.insert_resource(NextState(Some(EncounterState::OutcomeResolution)));
+            if power_targets.is_some() {
+                commands.insert_resource(TargetingTypes::SelectPower);
+            } else {
+                commands.insert_resource(NextState(Some(EncounterState::OutcomeResolution)));
+            }
         }
         Buttons::Power(power_entity) => {
             if let Ok(power) = powers.get(*power_entity) {
@@ -96,7 +124,6 @@ pub(crate) fn update_current_focusables(
                 let focus = matches!(button, Buttons::Resolve | Buttons::Power(_));
                 let is_focusable = focusable.state() != FocusState::Blocked;
                 if focus != is_focusable {
-                    info!("Update focusable - {is_focusable} to {focus}");
                     if focus {
                         focusable.unblock();
                     } else {

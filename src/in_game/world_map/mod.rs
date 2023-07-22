@@ -16,7 +16,7 @@ use crate::{
     },
 };
 
-use super::{encounter::EncounterSetup, game_state::GameState, InGameUpdate};
+use super::{encounter::EncounterInitialDetails, game_state::GameState, InGameUpdate};
 
 pub struct WorldMapPlugin;
 
@@ -51,7 +51,7 @@ const NUM_LOCATIONS_ON_MAP: usize = 14;
 
 #[derive(Resource, Reflect, InspectorOptions)]
 #[reflect(Resource, InspectorOptions)]
-pub struct PotentialEncounters(HashMap<usize, EncounterSetup>);
+pub struct PotentialEncounters(HashMap<usize, EncounterInitialDetails>);
 
 #[derive(Component, Reflect, InspectorOptions)]
 pub struct EncounterLocation(usize);
@@ -66,12 +66,12 @@ impl Default for PotentialEncounters {
     fn default() -> Self {
         Self(
             [
-                (0, EncounterSetup::default()),
-                (5, EncounterSetup::default()),
-                (13, EncounterSetup::default()),
+                (0, EncounterInitialDetails::default()),
+                (5, EncounterInitialDetails::default()),
+                (13, EncounterInitialDetails::default()),
             ]
             .into_iter()
-            .collect::<HashMap<usize, EncounterSetup>>(),
+            .collect::<HashMap<usize, EncounterInitialDetails>>(),
         )
     }
 }

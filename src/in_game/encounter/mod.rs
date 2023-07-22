@@ -103,6 +103,26 @@ pub struct EncounterEntity;
 
 #[derive(Resource, Reflect, InspectorOptions, Clone)]
 #[reflect(Resource, InspectorOptions)]
+pub struct EncounterInitialDetails {
+    pub title: Option<String>,
+    pub player_faction: Faction,
+    pub challengers: Vec<(usize, String)>,
+    pub location: Option<String>,
+}
+
+impl Default for EncounterInitialDetails {
+    fn default() -> Self {
+        Self {
+            title: Some("An Encounter".to_string()),
+            player_faction: Faction::Knights,
+            challengers: vec![(1, "monster".to_string())],
+            location: Some("grass".to_string()),
+        }
+    }
+}
+
+#[derive(Resource, Reflect, InspectorOptions, Clone)]
+#[reflect(Resource, InspectorOptions)]
 pub struct EncounterSetup {
     pub title: Option<String>,
     pub introduction: Option<String>,
@@ -131,6 +151,7 @@ fn generate_encounter(
     locations: Res<Assets<Locations>>,
     challengers: Res<Assets<Challengers>>,
     players: Res<Assets<Players>>,
+    initial_details: Option<Res<EncounterInitialDetails>>,
 ) {
     let (Some(locations), Some(challengers), Some(players)) = (
         locations.get(&assets.locations),
@@ -139,13 +160,23 @@ fn generate_encounter(
     ) else {
         return;
     };
+    let initial_details = initial_details.map(|v| v.clone()).unwrap_or_default();
+    commands.remove_resource::<EncounterInitialDetails>();
     commands.insert_resource(EncounterSetup {
-        location: locations.get("sand").cloned(),
-        player: players.get("player_knight").cloned(),
-        challengers: match challengers.get("monster") {
-            Some(c) => vec![(3, c.clone())],
-            None => vec![],
-        },
+        location: initial_details
+            .location
+            .and_then(|v| locations.get(&v).cloned()),
+        player: players
+            .get(match initial_details.player_faction {
+                Faction::Knights => "player_knight",
+                Faction::Druids => "player_druid",
+            })
+            .cloned(),
+        challengers: initial_details
+            .challengers
+            .iter()
+            .filter_map(|(n, v)| challengers.get(v).map(|v| (*n, v.clone())))
+            .collect(),
         ..Default::default()
     });
     info!("Generating Encounter");

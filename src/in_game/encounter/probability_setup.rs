@@ -286,28 +286,34 @@ fn resolve_actions(
 fn update_probability_distibution(
     mut commands: Commands,
     dice_pools: Query<&DicePool>,
-    updated_actions: Query<(&Children, &ActionChoice)>,
+    updated_actions: Query<(&Children, &ActionChoice, Has<UpdatedDicePool>)>,
     dice_pool_display: Query<(Entity, &ProbabilityVisualizer)>,
     mut global_rng: ResMut<GlobalRng>,
 ) {
     for (display_entity, ProbabilityVisualizer(action_entity, stored_simulation)) in
         dice_pool_display.iter()
     {
-        let Ok((dice_pool_entities, action)) = updated_actions.get(*action_entity) else {
+        let Ok((dice_pool_entities, action, just_updated)) = updated_actions.get(*action_entity)
+        else {
             continue;
         };
         let dice_pools = dice_pool_entities
             .iter()
             .flat_map(|e| dice_pools.get(*e).ok())
             .collect::<Vec<_>>();
+
         let simulation =
             SimulateDice::<100>::simulate(&dice_pools.as_slice(), global_rng.get_mut());
 
-        let simulation = Averager::<'_, _, _, 1, 20>(
-            simulation.iter().peekable(),
-            stored_simulation.iter().peekable(),
-        )
-        .collect::<Vec<(u8, f32)>>();
+        let simulation = if just_updated {
+            simulation
+        } else {
+            Averager::<'_, _, _, 1, 20>(
+                simulation.iter().peekable(),
+                stored_simulation.iter().peekable(),
+            )
+            .collect::<Vec<(u8, f32)>>()
+        };
 
         commands
             .entity(display_entity)
@@ -397,6 +403,9 @@ fn process_input(
     mut commands: Commands,
     interaction_query: TypedFocusedButtonQuery<'_, '_, '_, Buttons>,
     powers: Query<&Power>,
+    targeting: Res<TargetingTypes>,
+    power_containers: Query<Entity, With<PowerContainer>>,
+    dice_pools: Query<&DicePool>,
 ) {
     let Some(focused) = focused else {
         return;
@@ -404,6 +413,12 @@ fn process_input(
     let Some((_, btn)) = interaction_query.get(focused).ok() else {
         return;
     };
+    let power_targets =
+        if let TargetingTypes::PowerTarget(targeting, power_entity, power) = targeting.as_ref() {
+            Some((targeting, power_entity, power))
+        } else {
+            None
+        };
 
     match btn {
         Buttons::Resolve => {
@@ -418,8 +433,46 @@ fn process_input(
                 ));
             }
         }
-        Buttons::Pool { pool: _, action: _ } => {}
-        Buttons::Action(_) => {}
+        Buttons::Pool { pool, action } => {
+            if let Some((PowerTargetingType::Single, power_entity, power)) = power_targets {
+                let Ok(dice) = dice_pools.get(*pool) else {
+                    return;
+                };
+
+                commands.insert_resource(TargetingTypes::SelectPower);
+                commands.entity(*power_entity).despawn();
+                commands.entity(*pool).despawn();
+
+                commands
+                    .entity(*action)
+                    .insert(UpdatedDicePool)
+                    .with_children(|p| {
+                        for dice in power.apply(&[dice]).iter() {
+                            p.spawn(*dice);
+                        }
+                    });
+                for entity in power_containers.iter() {
+                    commands.entity(entity).insert(UpdatePowers);
+                }
+            }
+        }
+        Buttons::Action(action) => {
+            if let Some((PowerTargetingType::Action, power_entity, power)) = power_targets {
+                commands.insert_resource(TargetingTypes::SelectPower);
+                commands.entity(*power_entity).despawn();
+                commands
+                    .entity(*action)
+                    .insert(UpdatedDicePool)
+                    .with_children(|p| {
+                        for dice in power.apply(&[]).iter() {
+                            p.spawn(*dice);
+                        }
+                    });
+                for entity in power_containers.iter() {
+                    commands.entity(entity).insert(UpdatePowers);
+                }
+            }
+        }
     }
 }
 

@@ -189,6 +189,8 @@ fn spawn_encounter(
                 .with_children(|p| {
                     p.spawn(Power::SplitDice);
                     p.spawn(Power::Advantage);
+                    p.spawn(Power::StaticBonus(2));
+                    p.spawn(Power::AddDice(dice_pools::DiceType::D3));
                 });
         }
 

@@ -28,7 +28,6 @@ pub enum Power {
 pub enum PowerTargetingType {
     #[default]
     Single,
-    UpToX(u8),
     Action,
 }
 

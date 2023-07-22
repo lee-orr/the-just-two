@@ -1,7 +1,24 @@
+mod text;
+
 use bevy::{prelude::*, reflect::Reflect};
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
+use serde::Deserialize;
+
+use self::text::TextActionPlugin;
 
 use super::dice_pools::InitialPools;
+
+pub struct ActionPlugin;
+
+impl Plugin for ActionPlugin {
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app.register_type::<ActionChoice>()
+            .register_type::<ActionResult>()
+            .register_type::<Resolution>()
+            .register_type::<ActionType>()
+            .add_plugins(TextActionPlugin);
+    }
+}
 
 #[derive(Component, InspectorOptions, Reflect)]
 #[reflect(InspectorOptions)]
@@ -67,10 +84,19 @@ pub struct ChallengerAction;
 #[derive(Bundle, Default)]
 pub struct PlayerActionBundle {
     pub action_choice: ActionChoice,
+    pub action_type: ActionType,
 }
 
 #[derive(Bundle, Default)]
 pub struct ChallengerActionBundle {
     pub action_choice: ActionChoice,
     pub challenger_action: ChallengerAction,
+    pub action_type: ActionType,
+}
+
+#[derive(Component, InspectorOptions, Reflect, Deserialize, Default)]
+#[reflect(InspectorOptions)]
+pub enum ActionType {
+    #[default]
+    Text,
 }

@@ -22,8 +22,7 @@ pub struct ActionChoicePlugin;
 
 impl Plugin for ActionChoicePlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<ActionChoice>()
-            .register_type::<ChoiceButton>()
+        app.register_type::<ChoiceButton>()
             .add_systems(
                 OnEnter(EncounterState::ActionChoice),
                 (

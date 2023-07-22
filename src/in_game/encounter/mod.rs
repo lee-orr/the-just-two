@@ -1,4 +1,5 @@
 mod action_choice;
+mod action_resolutions;
 mod actions;
 mod challenger;
 mod dice_pools;
@@ -34,6 +35,8 @@ use crate::{
 
 use self::{
     action_choice::ActionChoicePlugin,
+    action_resolutions::ActionResolutionPlugin,
+    actions::ActionPlugin,
     challenger::{ChallengerPlugin, ChallengerReference},
     encounter_assets::{
         setup_encounter_assets, EncounterAssetPlugin, EncounterAssets, Materials, SceneBundler,
@@ -72,6 +75,8 @@ impl Plugin for EncounterPlugin {
                 ActionChoicePlugin,
                 ProbabilitySetupPlugin,
                 HealthPlugin,
+                ActionResolutionPlugin,
+                ActionPlugin,
             ))
             .add_systems(
                 OnEnter(GameState::Encounter),
@@ -195,6 +200,7 @@ fn spawn_encounter(
                     EncounterEntity,
                     CurrentHealth(5),
                     MaxHealth(7),
+                    Name::new("Player"),
                 ))
                 .with_children(|p| {
                     p.spawn(Power::SplitDice);
@@ -238,6 +244,7 @@ fn spawn_encounter(
                         MaxHealth(5),
                         bundle,
                         EncounterEntity,
+                        Name::new(format!("{} - {challenger_id}", challenger.name)),
                     ));
                     challenger_id += 1;
                 }

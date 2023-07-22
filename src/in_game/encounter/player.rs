@@ -76,6 +76,7 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                         },
                     ]),
                 },
+                ..Default::default()
             });
             p.spawn(PlayerActionBundle {
                 action_choice: ActionChoice {
@@ -95,6 +96,7 @@ fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
                         },
                     ]),
                 },
+                ..Default::default()
             });
         });
     }

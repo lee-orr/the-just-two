@@ -111,7 +111,7 @@ pub fn card_success(b: &mut dyn IntermediaryNodeBundleHandler) {
 
 pub fn card_fail_text(assets: &AssetServer, t: &mut TextStyle) {
     t.font_size = 20.;
-    t.color = FAIL_COLOR;
+    t.color = CRITICAL_FAIL_COLOR;
     t.font = assets.load("fonts/AMERSN__.ttf");
 }
 

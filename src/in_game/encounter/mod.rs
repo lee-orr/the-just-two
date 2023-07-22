@@ -3,6 +3,7 @@ mod actions;
 mod challenger;
 mod dice_pools;
 mod encounter_assets;
+mod health;
 mod introduction;
 mod location;
 mod player;
@@ -22,7 +23,12 @@ use bevy_inspector_egui::{
 
 use crate::{
     assets::MainGameAssets,
-    in_game::encounter::{challenger::Challenger, player::Player, powers::Power},
+    in_game::encounter::{
+        challenger::Challenger,
+        health::{CurrentHealth, MaxHealth},
+        player::Player,
+        powers::Power,
+    },
     materialized_scene::MaterializedSceneBundle,
 };
 
@@ -32,6 +38,7 @@ use self::{
     encounter_assets::{
         setup_encounter_assets, EncounterAssetPlugin, EncounterAssets, Materials, SceneBundler,
     },
+    health::HealthPlugin,
     introduction::IntroductionPlugin,
     location::{LocationPlugin, LocationReference},
     player::{PlayerPlugin, PlayerReference},
@@ -64,6 +71,7 @@ impl Plugin for EncounterPlugin {
                 PlayerPlugin,
                 ActionChoicePlugin,
                 ProbabilitySetupPlugin,
+                HealthPlugin,
             ))
             .add_systems(
                 OnEnter(GameState::Encounter),
@@ -185,6 +193,8 @@ fn spawn_encounter(
                     },
                     bundle,
                     EncounterEntity,
+                    CurrentHealth(5),
+                    MaxHealth(7),
                 ))
                 .with_children(|p| {
                     p.spawn(Power::SplitDice);
@@ -224,6 +234,8 @@ fn spawn_encounter(
                             id: challenger_id,
                             name: challenger.name.clone(),
                         },
+                        CurrentHealth(2),
+                        MaxHealth(5),
                         bundle,
                         EncounterEntity,
                     ));

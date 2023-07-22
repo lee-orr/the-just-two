@@ -137,8 +137,7 @@ impl DisplayBundle for Power {
                     .with_style(Style {
                         padding: UiRect::all(Val::Px(5.)),
                         ..default()
-                    })
-                    .with_background_color(colors::PRIMARY_BACKGROUND_COLOR),
+                    }),
                 );
             }
         };

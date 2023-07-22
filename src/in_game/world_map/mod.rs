@@ -47,6 +47,7 @@ impl Plugin for WorldMapPlugin {
 #[derive(Component)]
 pub struct WorldMapEntity;
 
+#[allow(dead_code)]
 const NUM_LOCATIONS_ON_MAP: usize = 14;
 
 #[derive(Resource, Reflect, InspectorOptions)]
@@ -133,10 +134,10 @@ fn clear_world_map(
     }
 }
 
-fn find_encounter_locations(
-    mut commands: Commands,
-    locations: Query<(Entity, &Name), (With<GlobalTransform>, Without<EncounterLocation>)>,
-) {
+type EncounterLocationTracking<'w, 's, 'a> =
+    Query<'w, 's, (Entity, &'a Name), (With<GlobalTransform>, Without<EncounterLocation>)>;
+
+fn find_encounter_locations(mut commands: Commands, locations: EncounterLocationTracking) {
     for (entity, location) in locations.iter() {
         if location.as_str().starts_with("Location.") {
             let name = location.as_str().replace("Location.", "");

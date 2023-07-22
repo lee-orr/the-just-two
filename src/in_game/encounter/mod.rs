@@ -101,7 +101,7 @@ impl Plugin for EncounterPlugin {
 #[derive(Component)]
 pub struct EncounterEntity;
 
-#[derive(Resource, Reflect, InspectorOptions)]
+#[derive(Resource, Reflect, InspectorOptions, Clone)]
 #[reflect(Resource, InspectorOptions)]
 pub struct EncounterSetup {
     pub title: Option<String>,

@@ -51,6 +51,6 @@ pub struct MainGameAssets {
     pub players: Handle<Players>,
     #[asset(path = "textures/color-pallet-labelled.png")]
     pub default_color_pallet: Handle<Image>,
-    #[asset(path = "models/world-map.gltf#Scene1")]
+    #[asset(path = "models/world-map.gltf#Scene0")]
     pub world_map: Handle<Scene>,
 }

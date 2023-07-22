@@ -2,6 +2,7 @@ mod encounter;
 mod factions;
 mod game_state;
 mod pause_screen;
+mod world_map;
 
 use bevy::{
     ecs::schedule::ScheduleLabel, input::common_conditions::input_toggle_active, prelude::*,
@@ -14,6 +15,7 @@ use self::{
     encounter::{sequencing::EncounterState, EncounterPlugin},
     game_state::{GameState, PauseState},
     pause_screen::PausePlugin,
+    world_map::WorldMapPlugin,
 };
 
 pub use self::encounter::{Challengers, Locations, Players};
@@ -21,7 +23,7 @@ pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((PausePlugin, EncounterPlugin))
+        app.add_plugins((PausePlugin, EncounterPlugin, WorldMapPlugin))
             .add_state::<GameState>()
             .register_type::<GameState>()
             .add_plugins(
@@ -45,9 +47,9 @@ struct InGame;
 pub struct InGameUpdate;
 
 fn setup(mut commands: Commands, assets: Res<MainGameAssets>) {
-    commands.insert_resource(NextState(Some(GameState::Encounter)));
+    commands.insert_resource(NextState(Some(GameState::WorldMap)));
     commands.insert_resource(AmbientLight {
-        color: Color::ORANGE_RED,
+        color: Color::rgba_u8(32, 20, 19, 255),
         brightness: 0.02,
     });
 

@@ -1,0 +1,6 @@
+name: World Map
+scene:
+  gltf: "models/world-map.gltf"
+  scene: "Root"
+  pallet:
+    - "textures/color-pallet-2.png"

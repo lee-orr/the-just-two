@@ -49,4 +49,8 @@ pub struct MainGameAssets {
     pub locations: Handle<Locations>,
     #[asset(path = "players.pl.yaml")]
     pub players: Handle<Players>,
+    #[asset(path = "textures/color-pallet-labelled.png")]
+    pub default_color_pallet: Handle<Image>,
+    #[asset(path = "models/world-map.gltf#Scene1")]
+    pub world_map: Handle<Scene>,
 }

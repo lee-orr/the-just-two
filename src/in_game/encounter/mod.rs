@@ -4,6 +4,7 @@ mod actions;
 mod challenger;
 mod dice_pools;
 mod encounter_assets;
+mod encounter_resolution;
 mod health;
 mod introduction;
 mod location;
@@ -41,6 +42,7 @@ use self::{
     encounter_assets::{
         setup_encounter_assets, EncounterAssetPlugin, EncounterAssets, Materials, SceneBundler,
     },
+    encounter_resolution::EncounterResolutionPlugin,
     health::HealthPlugin,
     introduction::IntroductionPlugin,
     location::{LocationPlugin, LocationReference},
@@ -77,13 +79,14 @@ impl Plugin for EncounterPlugin {
                 HealthPlugin,
                 ActionResolutionPlugin,
                 ActionPlugin,
+                EncounterResolutionPlugin,
             ))
             .add_systems(
                 OnEnter(GameState::Encounter),
                 generate_encounter.run_if(not(resource_exists::<EncounterSetup>())),
             )
+            .add_systems(OnExit(GameState::Encounter), despawn_encounter)
             .add_systems(OnEnter(EncounterState::Introduction), spawn_encounter)
-            .add_systems(OnEnter(EncounterState::None), despawn_encounter)
             .add_systems(
                 InGameUpdate,
                 start_encounter.run_if(
@@ -255,6 +258,7 @@ fn spawn_encounter(
 
 fn despawn_encounter(mut commands: Commands, query: Query<Entity, With<EncounterEntity>>) {
     commands.remove_resource::<EncounterSetup>();
+    commands.insert_resource(NextState(Some(EncounterState::None)));
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }

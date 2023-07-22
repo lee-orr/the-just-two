@@ -11,6 +11,7 @@ pub enum EncounterState {
     ActionChoice,
     ProbabilitySetup,
     OutcomeResolution,
+    CheckEncounterResolution,
     EncounterResolved,
 }
 

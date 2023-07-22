@@ -52,7 +52,7 @@ fn trigger_next_resolution(
             commands.entity(entity).insert(ActiveResolution);
         }
         None => {
-            commands.insert_resource(NextState(Some(EncounterState::ActionChoice)));
+            commands.insert_resource(NextState(Some(EncounterState::CheckEncounterResolution)));
         }
     }
 }

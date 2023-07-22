@@ -72,4 +72,17 @@ fn spawn_world_map(
     }
 }
 
-fn clear_world_map() {}
+fn clear_world_map(
+    mut commands: Commands,
+    camera: Query<Entity, With<Camera3d>>,
+    world_map_entities: Query<Entity, With<WorldMapEntity>>,
+) {
+    for camera in camera.iter() {
+        commands
+            .entity(camera)
+            .insert(Projection::Perspective(PerspectiveProjection::default()));
+    }
+    for entity in world_map_entities.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+}

@@ -1,9 +1,12 @@
 use bevy::{prelude::*, reflect::TypeUuid};
 use bevy_common_assets::yaml::YamlAssetPlugin;
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
+use bevy_turborand::{DelegatedRng, GlobalRng, TurboRand};
 use serde::Deserialize;
 
 use crate::{app_state::AppState, assets::MainGameAssets};
+
+use super::game_state::GameState;
 
 pub struct StoryPlugin;
 
@@ -13,13 +16,14 @@ impl Plugin for StoryPlugin {
             .register_type::<Phase>()
             .register_type::<PhaseRound>()
             .add_plugins(YamlAssetPlugin::<Story>::new(&["st.yaml"]))
-            .add_systems(OnEnter(AppState::InGame), start_story);
+            .add_systems(OnEnter(AppState::InGame), start_story)
+            .add_systems(Update, check_phase.run_if(in_state(AppState::InGame)));
     }
 }
 
 #[derive(Resource, Default, Reflect, Deserialize, InspectorOptions, Clone)]
 #[reflect(Resource, InspectorOptions)]
-pub struct PhaseRound(usize);
+pub struct PhaseRound(pub usize, pub usize);
 
 #[derive(Resource, Default, Reflect, Deserialize, InspectorOptions, Clone)]
 #[reflect(Resource, InspectorOptions)]
@@ -51,4 +55,29 @@ fn start_story(mut commands: Commands, assets: Res<MainGameAssets>, stories: Res
     commands.insert_resource(story);
     commands.insert_resource(phase);
     commands.insert_resource(PhaseRound::default());
+}
+
+fn check_phase(
+    mut commands: Commands,
+    round: Res<PhaseRound>,
+    phase: Res<Phase>,
+    story: Res<Story>,
+    mut global_rng: ResMut<GlobalRng>,
+) {
+    if !round.is_changed() {
+        return;
+    }
+    if round.0 < phase.min_missions {
+        return;
+    }
+    let rng = global_rng.get_mut();
+    if round.0 >= phase.max_missions || rng.bool() {
+        let next_phase = round.1 + 1;
+        if let Some(phase) = story.phases.get(next_phase) {
+            commands.insert_resource(phase.clone());
+            commands.insert_resource(PhaseRound(0, next_phase));
+        } else {
+            commands.insert_resource(NextState(Some(GameState::Complete)));
+        }
+    }
 }

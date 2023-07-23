@@ -39,5 +39,5 @@ fn check_encounter_state(mut commands: Commands, query: Query<Entity, With<Encou
 }
 
 fn exit_encounter(mut commands: Commands) {
-    commands.insert_resource(NextState(Some(GameState::WorldMap)));
+    commands.insert_resource(NextState(Some(GameState::Mission)));
 }

@@ -6,6 +6,34 @@ escape:
     - - escape_building
       - find_hiding_spot
       - distract_enemies
-    - - sneak_past_enemies
-      - save_from_building
-    - - lead_out_of_town
+    # - - sneak_past_enemies
+    #   - save_from_building
+    # - - lead_out_of_town
+
+rescue:
+  titles:
+    - A Missing Mother
+    - The Kidnapping
+  encounters:
+    - - an_encounter
+
+defend:
+  titles:
+    - A Troubled Town
+    - Rebuffing Rabid Rage
+  encounters:
+    - - an_encounter
+
+chase_bandits:
+  titles:
+    - Bundits and Buffons
+    - No Room for Both of Us
+  encounters:
+    - - an_encounter
+
+return_item:
+  titles:
+    - The Sacred Chalice
+    - A Diamond in the Shine
+  encounters:
+    - - an_encounter

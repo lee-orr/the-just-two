@@ -5,3 +5,11 @@ phases:
     simulatneous_missions: 1
     missions:
       - escape
+  - min_missions: 2
+    max_missions: 3
+    simulatneous_missions: 2
+    missions:
+      - rescue
+      - defend
+      - chase_bandits
+      - return_item

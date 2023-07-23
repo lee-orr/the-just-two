@@ -9,6 +9,8 @@ pub enum GameState {
     WorldMap,
     Mission,
     Encounter,
+    Failed,
+    Complete,
 }
 
 #[derive(Clone, Eq, PartialEq, Copy, Debug, Hash, Default, States, Reflect, InspectorOptions)]

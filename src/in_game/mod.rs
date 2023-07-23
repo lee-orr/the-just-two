@@ -1,5 +1,7 @@
 mod encounter;
 mod factions;
+mod game_completed;
+mod game_over;
 mod game_state;
 pub mod mission;
 mod pause_screen;
@@ -18,6 +20,8 @@ use crate::{app_state::AppState, assets::MainGameAssets};
 
 use self::{
     encounter::{dice_pools, powers::Power, sequencing::EncounterState, EncounterPlugin},
+    game_completed::GameCompletedPlugin,
+    game_over::GameOverPlugin,
     game_state::{GameState, PauseState},
     mission::MissionPlugin,
     pause_screen::PausePlugin,
@@ -36,6 +40,8 @@ impl Plugin for InGamePlugin {
             WorldMapPlugin,
             StoryPlugin,
             MissionPlugin,
+            GameOverPlugin,
+            GameCompletedPlugin,
         ))
         .add_state::<GameState>()
         .register_type::<GameState>()

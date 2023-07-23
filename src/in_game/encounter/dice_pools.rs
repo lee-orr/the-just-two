@@ -144,7 +144,7 @@ impl DisplayBundle for DicePool {
     fn display_bundle(&self, assets: &MainGameAssets, icon_size: f32, parent: &mut UiChildBuilder) {
         if DicePoolType::Advantage == self.pool {
             node(dice_pool_modifier.nb(), parent, |p| {
-                Power::Advantage.display_bundle(assets, icon_size, p);
+                Power::Advantage.display_bundle(assets, icon_size * 0.75, p);
             });
         }
         self.dice.display_bundle(assets, icon_size, parent);

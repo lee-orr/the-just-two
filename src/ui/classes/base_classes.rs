@@ -137,4 +137,5 @@ pub fn dice_pool_modifier(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().right = Val::Percent(45.);
     b.style().width = Val::Percent(50.);
     b.style().height = Val::Percent(50.);
+    b.z_index(ZIndex::Global(5));
 }

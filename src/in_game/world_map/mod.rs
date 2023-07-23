@@ -1,7 +1,7 @@
 use bevy::{prelude::*, utils::HashMap};
 
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
-use bevy_ui_dsl::{root, text};
+use bevy_ui_dsl::{node, root, text};
 use bevy_vector_shapes::{prelude::ShapePainter, shapes::DiscPainter};
 
 use crate::{
@@ -13,10 +13,15 @@ use crate::{
         classes::*,
         colors,
         intermediary_node_bundles::IntoIntermediaryNodeBundle,
+        DisplayBundle,
     },
 };
 
-use super::{encounter::EncounterInitialDetails, game_state::GameState, InGameUpdate};
+use super::{
+    encounter::{powers::Power, EncounterInitialDetails},
+    game_state::GameState,
+    InGameUpdate,
+};
 
 pub struct WorldMapPlugin;
 
@@ -24,7 +29,10 @@ impl Plugin for WorldMapPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<PotentialEncounters>()
             .register_type::<EncounterLocation>()
-            .add_systems(OnEnter(GameState::WorldMap), spawn_world_map)
+            .add_systems(
+                OnEnter(GameState::WorldMap),
+                (spawn_world_map, draw_available_powers),
+            )
             .add_systems(OnExit(GameState::WorldMap), clear_world_map)
             .add_systems(
                 Update,
@@ -287,4 +295,26 @@ fn process_input(
         commands.insert_resource(encounter.clone());
         commands.insert_resource(NextState(Some(GameState::Encounter)));
     }
+}
+
+fn draw_available_powers(
+    mut commands: Commands,
+    powers: Query<&Power>,
+    assets: Res<MainGameAssets>,
+    asset_server: Res<AssetServer>,
+) {
+    let r = root(map_powers_root, &asset_server, &mut commands, |p| {
+        node(map_powers_container, p, |p| {
+            for power in powers.iter() {
+                node(map_power_card, p, |p| {
+                    power.display_bundle(&assets, 50., p);
+                });
+            }
+            node(map_powers_overlay, p, |_p| {});
+        });
+    });
+
+    commands
+        .entity(r)
+        .insert((WorldMapEntity, Name::new("Available Powers Panel")));
 }

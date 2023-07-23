@@ -5,14 +5,17 @@ mod pause_screen;
 mod world_map;
 
 use bevy::{
-    ecs::schedule::ScheduleLabel, input::common_conditions::input_toggle_active, prelude::*,
+    audio::{Volume, VolumeLevel},
+    ecs::schedule::ScheduleLabel,
+    input::common_conditions::input_toggle_active,
+    prelude::*,
 };
 use bevy_inspector_egui::quick::StateInspectorPlugin;
 
 use crate::{app_state::AppState, assets::MainGameAssets};
 
 use self::{
-    encounter::{sequencing::EncounterState, EncounterPlugin},
+    encounter::{dice_pools, powers::Power, sequencing::EncounterState, EncounterPlugin},
     game_state::{GameState, PauseState},
     pause_screen::PausePlugin,
     world_map::WorldMapPlugin,
@@ -64,9 +67,15 @@ fn setup(mut commands: Commands, assets: Res<MainGameAssets>) {
                 source: assets.menu_music.clone(),
                 settings: PlaybackSettings {
                     paused: true,
+                    volume: Volume::Absolute(VolumeLevel::new(0.)),
                     ..Default::default()
                 },
             });
+
+            p.spawn(Power::SplitDice);
+            p.spawn(Power::Advantage);
+            p.spawn(Power::StaticBonus(2));
+            p.spawn(Power::AddDice(dice_pools::DiceType::D3));
         });
 }
 

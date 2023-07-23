@@ -9,6 +9,7 @@ pub trait IntermediaryNodeBundleHandler {
     fn style(&mut self) -> &mut Style;
     fn background_color(&mut self) -> &mut BackgroundColor;
     fn border_color(&mut self) -> Option<&mut BorderColor>;
+    fn z_index(&mut self, z_index: ZIndex);
 }
 
 impl IntermediaryNodeBundleHandler for NodeBundle {
@@ -22,6 +23,10 @@ impl IntermediaryNodeBundleHandler for NodeBundle {
 
     fn border_color(&mut self) -> Option<&mut BorderColor> {
         Some(&mut self.border_color)
+    }
+
+    fn z_index(&mut self, z_index: ZIndex) {
+        self.z_index = z_index;
     }
 }
 
@@ -37,6 +42,10 @@ impl IntermediaryNodeBundleHandler for TextBundle {
     fn border_color(&mut self) -> Option<&mut BorderColor> {
         None
     }
+
+    fn z_index(&mut self, z_index: ZIndex) {
+        self.z_index = z_index;
+    }
 }
 
 impl IntermediaryNodeBundleHandler for ButtonBundle {
@@ -51,6 +60,10 @@ impl IntermediaryNodeBundleHandler for ButtonBundle {
     fn border_color(&mut self) -> Option<&mut BorderColor> {
         Some(&mut self.border_color)
     }
+
+    fn z_index(&mut self, z_index: ZIndex) {
+        self.z_index = z_index;
+    }
 }
 
 impl IntermediaryNodeBundleHandler for FocusableButtonBundle {
@@ -64,6 +77,10 @@ impl IntermediaryNodeBundleHandler for FocusableButtonBundle {
 
     fn border_color(&mut self) -> Option<&mut BorderColor> {
         Some(&mut self.button_bundle.border_color)
+    }
+
+    fn z_index(&mut self, z_index: ZIndex) {
+        self.button_bundle.z_index = z_index;
     }
 }
 

@@ -1,15 +1,15 @@
 mod action_choice;
 mod action_resolutions;
-mod actions;
+pub mod actions;
 mod challenger;
-mod dice_pools;
+pub mod dice_pools;
 mod encounter_assets;
 mod encounter_resolution;
 mod health;
 mod introduction;
 mod location;
 mod player;
-mod powers;
+pub mod powers;
 mod probability_setup;
 pub mod sequencing;
 
@@ -29,7 +29,6 @@ use crate::{
         challenger::Challenger,
         health::{CurrentHealth, MaxHealth},
         player::Player,
-        powers::Power,
     },
     materialized_scene::MaterializedSceneBundle,
 };
@@ -225,23 +224,16 @@ fn spawn_encounter(
                 },
                 ..bundle.clone()
             };
-            commands
-                .spawn((
-                    Player {
-                        name: player.name.clone(),
-                    },
-                    bundle,
-                    EncounterEntity,
-                    CurrentHealth(5),
-                    MaxHealth(7),
-                    Name::new("Player"),
-                ))
-                .with_children(|p| {
-                    p.spawn(Power::SplitDice);
-                    p.spawn(Power::Advantage);
-                    p.spawn(Power::StaticBonus(2));
-                    p.spawn(Power::AddDice(dice_pools::DiceType::D3));
-                });
+            commands.spawn((
+                Player {
+                    name: player.name.clone(),
+                },
+                bundle,
+                EncounterEntity,
+                CurrentHealth(5),
+                MaxHealth(7),
+                Name::new("Player"),
+            ));
         }
 
         let mut challenger_id = 0usize;

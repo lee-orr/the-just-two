@@ -1,10 +1,11 @@
+mod combat;
 mod text;
 
 use bevy::{prelude::*, reflect::Reflect};
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 use serde::Deserialize;
 
-use self::text::TextActionPlugin;
+use self::{combat::CombatActionPlugin, text::TextActionPlugin};
 
 use super::dice_pools::InitialPools;
 
@@ -16,7 +17,8 @@ impl Plugin for ActionPlugin {
             .register_type::<ActionResult>()
             .register_type::<Resolution>()
             .register_type::<ActionType>()
-            .add_plugins(TextActionPlugin);
+            .add_plugins(TextActionPlugin)
+            .add_plugins(CombatActionPlugin);
     }
 }
 

@@ -11,7 +11,7 @@ use serde::Deserialize;
 use crate::materialized_scene::MaterializedSceneReference;
 
 use super::{
-    actions::{ActionDefinition, ChallengerActionBundle, PlayerActionBundle},
+    actions::{ActionChoice, ActionDefinition, ChallengerActionBundle, PlayerActionBundle},
     health::MaxHealth,
     sequencing::{EncounterState, PublishAvailableActions},
 };
@@ -71,13 +71,21 @@ fn publish_challenger_action(
         };
         commands.entity(entity).with_children(|p| {
             p.spawn(ChallengerActionBundle {
-                action_choice: choice.choice.clone(),
+                action_choice: ActionChoice {
+                    title: choice.choice.title.replace("**", &challenger.name),
+                    content: choice.choice.content.replace("**", &challenger.name),
+                    ..choice.choice.clone()
+                },
                 action_type: choice.action_type.clone(),
                 ..default()
             });
             for choice in challenger.published_actions.iter() {
                 p.spawn(PlayerActionBundle {
-                    action_choice: choice.choice.clone(),
+                    action_choice: ActionChoice {
+                        title: choice.choice.title.replace("**", &challenger.name),
+                        content: choice.choice.content.replace("**", &challenger.name),
+                        ..choice.choice.clone()
+                    },
                     action_type: choice.action_type.clone(),
                 });
             }

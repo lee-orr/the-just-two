@@ -88,6 +88,7 @@ pub enum DicePoolType {
 #[reflect(InspectorOptions)]
 pub struct DicePool {
     pub dice: DiceType,
+    #[serde(default)]
     pub pool: DicePoolType,
 }
 

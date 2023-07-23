@@ -1,7 +1,9 @@
 mod encounter;
 mod factions;
 mod game_state;
+pub mod mission;
 mod pause_screen;
+pub mod story;
 mod world_map;
 
 use bevy::{
@@ -17,7 +19,9 @@ use crate::{app_state::AppState, assets::MainGameAssets};
 use self::{
     encounter::{dice_pools, powers::Power, sequencing::EncounterState, EncounterPlugin},
     game_state::{GameState, PauseState},
+    mission::MissionPlugin,
     pause_screen::PausePlugin,
+    story::StoryPlugin,
     world_map::WorldMapPlugin,
 };
 
@@ -26,20 +30,26 @@ pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((PausePlugin, EncounterPlugin, WorldMapPlugin))
-            .add_state::<GameState>()
-            .register_type::<GameState>()
-            .add_plugins(
-                StateInspectorPlugin::<GameState>::default()
-                    .run_if(input_toggle_active(false, KeyCode::F1)),
-            )
-            .add_systems(OnEnter(AppState::InGame), setup)
-            .add_systems(OnExit(AppState::InGame), (exit, clear_audio))
-            .add_systems(Update, (enable_audio).run_if(in_state(AppState::InGame)))
-            .add_systems(
-                Update,
-                run_in_game_update.run_if(in_state(PauseState::None)),
-            );
+        app.add_plugins((
+            PausePlugin,
+            EncounterPlugin,
+            WorldMapPlugin,
+            StoryPlugin,
+            MissionPlugin,
+        ))
+        .add_state::<GameState>()
+        .register_type::<GameState>()
+        .add_plugins(
+            StateInspectorPlugin::<GameState>::default()
+                .run_if(input_toggle_active(false, KeyCode::F1)),
+        )
+        .add_systems(OnEnter(AppState::InGame), setup)
+        .add_systems(OnExit(AppState::InGame), (exit, clear_audio))
+        .add_systems(Update, (enable_audio).run_if(in_state(AppState::InGame)))
+        .add_systems(
+            Update,
+            run_in_game_update.run_if(in_state(PauseState::None)),
+        );
     }
 }
 

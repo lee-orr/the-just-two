@@ -1,0 +1,10 @@
+escape:
+  titles:
+    - The Escape
+    - A Home No More
+  encounters:
+    - - escape_building
+      - find_hiding_spot
+    - - sneak_past_enemies
+      - save_from_building
+    - - lead_out_of_town

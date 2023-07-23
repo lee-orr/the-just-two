@@ -13,18 +13,18 @@ pub mod powers;
 mod probability_setup;
 pub mod sequencing;
 
+pub mod encounter_generation;
+pub mod encounter_setup_types;
+
 use bevy::{
     gltf::{Gltf, GltfNode},
     input::common_conditions::input_toggle_active,
     prelude::*,
 };
 use bevy_asset_loader::prelude::DynamicAssets;
-use bevy_inspector_egui::{
-    prelude::ReflectInspectorOptions, quick::StateInspectorPlugin, InspectorOptions,
-};
+use bevy_inspector_egui::quick::StateInspectorPlugin;
 
 use crate::{
-    assets::MainGameAssets,
     in_game::encounter::{
         challenger::Challenger,
         health::{CurrentHealth, MaxHealth},
@@ -37,15 +37,16 @@ use self::{
     action_choice::ActionChoicePlugin,
     action_resolutions::ActionResolutionPlugin,
     actions::ActionPlugin,
-    challenger::{ChallengerPlugin, ChallengerReference},
+    challenger::ChallengerPlugin,
     encounter_assets::{
         setup_encounter_assets, EncounterAssetPlugin, EncounterAssets, Materials, SceneBundler,
     },
+    encounter_generation::generate_encounter,
     encounter_resolution::EncounterResolutionPlugin,
     health::HealthPlugin,
     introduction::IntroductionPlugin,
-    location::{LocationPlugin, LocationReference},
-    player::{PlayerPlugin, PlayerReference},
+    location::LocationPlugin,
+    player::PlayerPlugin,
     probability_setup::ProbabilitySetupPlugin,
     sequencing::EncounterState,
 };
@@ -62,7 +63,7 @@ impl Plugin for EncounterPlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<EncounterState>()
             .register_type::<EncounterState>()
-            .register_type::<EncounterSetup>()
+            .register_type::<encounter_setup_types::EncounterSetup>()
             .add_plugins(
                 StateInspectorPlugin::<EncounterState>::default()
                     .run_if(input_toggle_active(false, KeyCode::F1)),
@@ -82,7 +83,9 @@ impl Plugin for EncounterPlugin {
             ))
             .add_systems(
                 OnEnter(GameState::Encounter),
-                generate_encounter.run_if(not(resource_exists::<EncounterSetup>())),
+                generate_encounter.run_if(not(resource_exists::<
+                    encounter_setup_types::EncounterSetup,
+                >())),
             )
             .add_systems(OnExit(GameState::Encounter), despawn_encounter)
             .add_systems(OnEnter(EncounterState::Introduction), spawn_encounter)
@@ -90,8 +93,8 @@ impl Plugin for EncounterPlugin {
                 InGameUpdate,
                 start_encounter.run_if(
                     in_state(EncounterState::None)
-                        .and_then(resource_exists::<EncounterSetup>())
-                        .and_then(resource_changed::<EncounterSetup>()),
+                        .and_then(resource_exists::<encounter_setup_types::EncounterSetup>())
+                        .and_then(resource_changed::<encounter_setup_types::EncounterSetup>()),
                 ),
             );
     }
@@ -100,90 +103,9 @@ impl Plugin for EncounterPlugin {
 #[derive(Component)]
 pub struct EncounterEntity;
 
-#[derive(Resource, Reflect, InspectorOptions, Clone)]
-#[reflect(Resource, InspectorOptions)]
-pub struct EncounterInitialDetails {
-    pub title: Option<String>,
-    pub player_faction: Faction,
-    pub challengers: Vec<(usize, String)>,
-    pub location: Option<String>,
-}
-
-impl Default for EncounterInitialDetails {
-    fn default() -> Self {
-        Self {
-            title: Some("An Encounter".to_string()),
-            player_faction: Faction::Knights,
-            challengers: vec![(1, "monster".to_string())],
-            location: Some("grass".to_string()),
-        }
-    }
-}
-
-#[derive(Resource, Reflect, InspectorOptions, Clone)]
-#[reflect(Resource, InspectorOptions)]
-pub struct EncounterSetup {
-    pub title: Option<String>,
-    pub introduction: Option<String>,
-    pub player_faction: Faction,
-    pub player: Option<PlayerReference>,
-    pub challengers: Vec<(usize, ChallengerReference)>,
-    pub location: Option<LocationReference>,
-}
-
-impl Default for EncounterSetup {
-    fn default() -> Self {
-        Self {
-            title: Some("An Encounter".to_string()),
-            introduction: Some("Let me introduce myself...".to_string()),
-            player_faction: Faction::Knights,
-            challengers: vec![],
-            location: None,
-            player: None,
-        }
-    }
-}
-
-fn generate_encounter(
-    mut commands: Commands,
-    assets: Res<MainGameAssets>,
-    locations: Res<Assets<Locations>>,
-    challengers: Res<Assets<Challengers>>,
-    players: Res<Assets<Players>>,
-    initial_details: Option<Res<EncounterInitialDetails>>,
-) {
-    let (Some(locations), Some(challengers), Some(players)) = (
-        locations.get(&assets.locations),
-        challengers.get(&assets.challengers),
-        players.get(&assets.players),
-    ) else {
-        return;
-    };
-    let initial_details = initial_details.map(|v| v.clone()).unwrap_or_default();
-    commands.remove_resource::<EncounterInitialDetails>();
-    commands.insert_resource(EncounterSetup {
-        location: initial_details
-            .location
-            .and_then(|v| locations.get(&v).cloned()),
-        player: players
-            .get(match initial_details.player_faction {
-                Faction::Knights => "player_knight",
-                Faction::Druids => "player_druid",
-            })
-            .cloned(),
-        challengers: initial_details
-            .challengers
-            .iter()
-            .filter_map(|(n, v)| challengers.get(v).map(|v| (*n, v.clone())))
-            .collect(),
-        ..Default::default()
-    });
-    info!("Generating Encounter");
-}
-
 fn start_encounter(
     mut commands: Commands,
-    setup: Res<EncounterSetup>,
+    setup: Res<encounter_setup_types::EncounterSetup>,
     mut dynamic_assets: ResMut<DynamicAssets>,
 ) {
     setup_encounter_assets(setup.as_ref(), dynamic_assets.as_mut());
@@ -192,7 +114,7 @@ fn start_encounter(
 
 fn spawn_encounter(
     mut commands: Commands,
-    setup: Res<EncounterSetup>,
+    setup: Res<encounter_setup_types::EncounterSetup>,
     assets: Res<EncounterAssets>,
     materials: Res<Materials>,
     gltf: Res<Assets<Gltf>>,
@@ -280,7 +202,7 @@ fn spawn_encounter(
 }
 
 fn despawn_encounter(mut commands: Commands, query: Query<Entity, With<EncounterEntity>>) {
-    commands.remove_resource::<EncounterSetup>();
+    commands.remove_resource::<encounter_setup_types::EncounterSetup>();
     commands.insert_resource(NextState(Some(EncounterState::None)));
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();

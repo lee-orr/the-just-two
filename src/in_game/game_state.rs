@@ -7,6 +7,7 @@ pub enum GameState {
     #[default]
     None,
     WorldMap,
+    Mission,
     Encounter,
 }
 

@@ -6,7 +6,10 @@ use crate::{
     toon_material::ToonMaterial,
 };
 
-use super::{sequencing::EncounterState, EncounterSetup};
+use super::{
+    encounter_setup_types::{self},
+    sequencing::EncounterState,
+};
 use bevy::{
     gltf::{Gltf, GltfNode},
     prelude::*,
@@ -71,7 +74,10 @@ fn unload_assets(mut commands: Commands) {
     commands.remove_resource::<EncounterAssets>();
 }
 
-pub fn setup_encounter_assets(setup: &EncounterSetup, dynamic: &mut DynamicAssets) {
+pub fn setup_encounter_assets(
+    setup: &encounter_setup_types::EncounterSetup,
+    dynamic: &mut DynamicAssets,
+) {
     info!("Setting Up Encounter Assets");
     let mut scene_refs = setup
         .challengers

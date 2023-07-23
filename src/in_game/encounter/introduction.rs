@@ -12,7 +12,10 @@ use crate::{
     },
 };
 
-use super::{sequencing::EncounterState, EncounterSetup};
+use super::{
+    encounter_setup_types::{self},
+    sequencing::EncounterState,
+};
 pub struct IntroductionPlugin;
 
 impl Plugin for IntroductionPlugin {
@@ -37,7 +40,7 @@ struct LoadingEncounterText;
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    setup: Option<Res<EncounterSetup>>,
+    setup: Option<Res<encounter_setup_types::EncounterSetup>>,
 ) {
     let Some(setup) = setup else {
         commands.insert_resource(NextState(Some(GameState::WorldMap)));

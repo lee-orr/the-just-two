@@ -1,0 +1,7 @@
+title: The Ballad of the Just Two
+phases:
+  - min_missions: 1
+    max_missions: 1
+    simulatneous_missions: 1
+    missions:
+      - escape

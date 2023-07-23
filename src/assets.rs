@@ -4,7 +4,7 @@ use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 
 use crate::{
     app_state::AppState,
-    in_game::{Challengers, Locations, Players},
+    in_game::{mission::mission_types::Missions, story::Story, Challengers, Locations, Players},
 };
 
 pub struct MainGameAssetPlugin;
@@ -35,8 +35,10 @@ pub struct MainGameAssets {
     ))]
     #[asset(path = "textures/icons.png")]
     pub icons: Handle<TextureAtlas>,
+
     #[asset(path = "music/test.flac")]
     pub menu_music: Handle<AudioSource>,
+
     #[asset(path = "fonts/ENDOR___.ttf")]
     pub knights_font: Handle<Font>,
     #[asset(path = "fonts/IMMORTAL.ttf")]
@@ -45,10 +47,16 @@ pub struct MainGameAssets {
     pub default_font: Handle<Font>,
     #[asset(path = "challengers.ch.yaml")]
     pub challengers: Handle<Challengers>,
+
     #[asset(path = "locations.lc.yaml")]
     pub locations: Handle<Locations>,
     #[asset(path = "players.pl.yaml")]
     pub players: Handle<Players>,
+    #[asset(path = "story.st.yaml")]
+    pub story: Handle<Story>,
+    #[asset(path = "missions.ms.yaml")]
+    pub missions: Handle<Missions>,
+
     #[asset(path = "textures/color-pallet-labelled.png")]
     pub default_color_pallet: Handle<Image>,
     #[asset(path = "models/world-map.gltf#Scene0")]

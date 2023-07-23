@@ -6,6 +6,7 @@ use bevy_vector_shapes::{prelude::ShapePainter, shapes::DiscPainter};
 
 use crate::{
     assets::MainGameAssets,
+    in_game::mission::mission_types::MissionStage,
     materialized_scene::{MaterializedScene, MaterializedSceneBundle},
     toon_material::ToonMaterial,
     ui::{
@@ -18,16 +19,14 @@ use crate::{
 };
 
 use super::{
-    encounter::{powers::Power, EncounterInitialDetails},
-    game_state::GameState,
-    InGameUpdate,
+    encounter::powers::Power, game_state::GameState, mission::mission_types::Mission, InGameUpdate,
 };
 
 pub struct WorldMapPlugin;
 
 impl Plugin for WorldMapPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<PotentialEncounters>()
+        app.register_type::<PotentialMissions>()
             .register_type::<EncounterLocation>()
             .add_systems(
                 OnEnter(GameState::WorldMap),
@@ -58,9 +57,9 @@ pub struct WorldMapEntity;
 #[allow(dead_code)]
 const NUM_LOCATIONS_ON_MAP: usize = 14;
 
-#[derive(Resource, Reflect, InspectorOptions)]
+#[derive(Resource, Reflect, InspectorOptions, Default)]
 #[reflect(Resource, InspectorOptions)]
-pub struct PotentialEncounters(HashMap<usize, EncounterInitialDetails>);
+pub struct PotentialMissions(HashMap<usize, Mission>);
 
 #[derive(Component, Reflect, InspectorOptions)]
 pub struct EncounterLocation(usize);
@@ -71,27 +70,13 @@ pub struct UiButtonLocation(Entity);
 #[derive(Component)]
 pub struct UiButton(usize);
 
-impl Default for PotentialEncounters {
-    fn default() -> Self {
-        Self(
-            [
-                (0, EncounterInitialDetails::default()),
-                (5, EncounterInitialDetails::default()),
-                (13, EncounterInitialDetails::default()),
-            ]
-            .into_iter()
-            .collect::<HashMap<usize, EncounterInitialDetails>>(),
-        )
-    }
-}
-
 fn spawn_world_map(
     mut commands: Commands,
     assets: Res<MainGameAssets>,
     mut materials: ResMut<Assets<ToonMaterial>>,
     camera: Query<Entity, With<Camera3d>>,
 ) {
-    commands.insert_resource(PotentialEncounters::default());
+    commands.insert_resource(PotentialMissions::default());
 
     commands.insert_resource(AmbientLight {
         color: Color::rgba_u8(32, 20, 19, 255),
@@ -161,7 +146,7 @@ fn draw_encounter_locations(
     camera: Query<(&GlobalTransform, &Camera), With<Camera3d>>,
     camera_2d: Query<(&GlobalTransform, &Camera), With<Camera2d>>,
     locations: Query<(&GlobalTransform, &EncounterLocation)>,
-    potential_encounters: Res<PotentialEncounters>,
+    potential_encounters: Res<PotentialMissions>,
 ) {
     let Ok((camera_transform, camera)) = camera.get_single() else {
         return;
@@ -194,7 +179,7 @@ fn draw_encounter_locations(
 fn draw_encounter_selection_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    potential_encounters: Res<PotentialEncounters>,
+    potential_encounters: Res<PotentialMissions>,
     camera: Query<(&GlobalTransform, &Camera), With<Camera3d>>,
     locations: Query<(Entity, &GlobalTransform, &EncounterLocation), Added<EncounterLocation>>,
 ) {
@@ -236,12 +221,7 @@ fn draw_encounter_selection_ui(
                     apply_encounter_state,
                     p,
                     |p| {
-                        text(
-                            encounter.title.clone().unwrap_or("Encounter".to_string()),
-                            (),
-                            standard_text,
-                            p,
-                        );
+                        text(encounter.title.as_str(), (), standard_text, p);
                     },
                 ));
             },
@@ -282,7 +262,7 @@ fn process_input(
     In(focused): In<Option<Entity>>,
     mut commands: Commands,
     interaction_query: TypedFocusedButtonQuery<'_, '_, '_, UiButton>,
-    potential_encounters: Res<PotentialEncounters>,
+    potential_encounters: Res<PotentialMissions>,
 ) {
     let Some(focused) = focused else {
         return;
@@ -291,9 +271,10 @@ fn process_input(
         return;
     };
     info!("Got Here...");
-    if let Some(encounter) = potential_encounters.0.get(&btn.0) {
-        commands.insert_resource(encounter.clone());
-        commands.insert_resource(NextState(Some(GameState::Encounter)));
+    if let Some(mission) = potential_encounters.0.get(&btn.0) {
+        commands.insert_resource(mission.clone());
+        commands.insert_resource(MissionStage(0));
+        commands.insert_resource(NextState(Some(GameState::Mission)));
     }
 }
 

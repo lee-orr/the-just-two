@@ -20,7 +20,7 @@ use crate::{
 };
 
 use super::{
-    encounter::powers::Power,
+    encounter::{encounter_setup_types::Encounters, powers::Power},
     game_state::GameState,
     mission::mission_types::{Mission, Missions},
     story::Phase,
@@ -125,8 +125,12 @@ fn generate_potential_missions(
     mut global_rng: ResMut<GlobalRng>,
     assets: Res<MainGameAssets>,
     missions: Res<Assets<Missions>>,
+    encounters: Res<Assets<Encounters>>,
 ) {
-    let Some(missions) = missions.get(&assets.missions) else {
+    let (Some(missions), Some(encounters)) = (
+        missions.get(&assets.missions),
+        encounters.get(&assets.encounters),
+    ) else {
         return;
     };
     let rng = global_rng.get_mut();
@@ -135,7 +139,12 @@ fn generate_potential_missions(
     let result = locations
         .iter()
         .zip(select_missions.iter())
-        .filter_map(|(a, b)| missions.0.get(b.as_str()).map(|v| (*a, v.mission(rng))))
+        .filter_map(|(a, b)| {
+            missions
+                .0
+                .get(b.as_str())
+                .map(|v| (*a, v.mission(rng, encounters)))
+        })
         .collect();
     commands.insert_resource(PotentialMissions(result));
 }

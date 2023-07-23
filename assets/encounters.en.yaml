@@ -1,0 +1,31 @@
+escape_building:
+  title: Escape The Building
+  player_faction: Knights
+  location: grass
+  challengers:
+    - - 2
+      - monster
+
+find_hiding_spot:
+  title: Finding a Hiding Spot
+  player_faction: Knights
+  location: sand
+  challengers:
+    - - 1
+      - monster
+
+distract_enemies:
+  title: Distract Enemies
+  player_faction: Knights
+  location: grass
+  challengers:
+    - - 3
+      - monster
+
+an_encounter:
+  title: Some Encounter...
+  player_faction: Knights
+  location: sand
+  challengers:
+    - - 1
+      - monster

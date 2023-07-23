@@ -39,6 +39,7 @@ use self::{
     },
     encounter_generation::generate_encounter,
     encounter_resolution::EncounterResolutionPlugin,
+    encounter_setup_types::EncounterSetupPlugin,
     health::HealthPlugin,
     introduction::IntroductionPlugin,
     location::LocationPlugin,
@@ -59,7 +60,6 @@ impl Plugin for EncounterPlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<EncounterState>()
             .register_type::<EncounterState>()
-            .register_type::<encounter_setup_types::EncounterSetup>()
             .add_plugins(
                 StateInspectorPlugin::<EncounterState>::default()
                     .run_if(input_toggle_active(false, KeyCode::F1)),
@@ -76,6 +76,7 @@ impl Plugin for EncounterPlugin {
                 ActionResolutionPlugin,
                 ActionPlugin,
                 EncounterResolutionPlugin,
+                EncounterSetupPlugin,
             ))
             .add_systems(
                 OnEnter(GameState::Encounter),

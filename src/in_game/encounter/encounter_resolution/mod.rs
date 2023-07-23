@@ -12,16 +12,7 @@ impl Plugin for EncounterResolutionPlugin {
             PostUpdate,
             check_encounter_state.run_if(in_state(EncounterState::CheckEncounterResolution)),
         )
-        .add_systems(
-            OnEnter(EncounterState::EncounterResolved),
-exit_encounter
-        )
-        // .add_systems(
-        //     InGameUpdate,
-        //     (focused_button_activated.pipe(process_input))
-        //         .run_if(in_state(EncounterState::OutcomeResolution)),
-        // )
-        ;
+        .add_systems(OnEnter(EncounterState::EncounterResolved), exit_encounter);
     }
 }
 
@@ -32,9 +23,15 @@ fn check_encounter_state(
     mut commands: Commands,
     query: Query<Entity, (With<Challenger>, Without<ChallengerCompleted>)>,
 ) {
+    info!("Checking encounter state...");
+    for e in query.iter() {
+        info!("Found {e:?} is still active");
+    }
     let next_state = if !query.is_empty() {
+        info!("Choosing Action");
         EncounterState::ActionChoice
     } else {
+        info!("Encounter Resolved");
         EncounterState::EncounterResolved
     };
 

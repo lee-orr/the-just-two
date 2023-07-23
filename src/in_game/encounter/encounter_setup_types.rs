@@ -1,5 +1,7 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, reflect::TypeUuid, utils::HashMap};
+use bevy_common_assets::yaml::YamlAssetPlugin;
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
+use serde::Deserialize;
 
 use crate::in_game::factions::Faction;
 
@@ -7,7 +9,17 @@ use super::{
     challenger::ChallengerReference, location::LocationReference, player::PlayerReference,
 };
 
-#[derive(Resource, Reflect, InspectorOptions, Clone)]
+pub struct EncounterSetupPlugin;
+
+impl Plugin for EncounterSetupPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<EncounterSetup>()
+            .register_type::<EncounterInitialDetails>()
+            .add_plugins(YamlAssetPlugin::<Encounters>::new(&["en.yaml"]));
+    }
+}
+
+#[derive(Resource, Reflect, InspectorOptions, Clone, Deserialize)]
 #[reflect(Resource, InspectorOptions)]
 pub struct EncounterInitialDetails {
     pub title: Option<String>,
@@ -50,3 +62,7 @@ impl Default for EncounterSetup {
         }
     }
 }
+
+#[derive(Reflect, InspectorOptions, Deserialize, TypeUuid)]
+#[uuid = "274d4ad0-c00d-4889-b3dd-bc0d688ddc40"]
+pub struct Encounters(pub HashMap<String, EncounterInitialDetails>);

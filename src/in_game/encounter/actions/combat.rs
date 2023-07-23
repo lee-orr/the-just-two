@@ -26,8 +26,11 @@ impl Plugin for CombatActionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (display_combat_resolution, end_combat_encounter)
-                .run_if(in_state(EncounterState::OutcomeResolution)),
+            (display_combat_resolution).run_if(in_state(EncounterState::OutcomeResolution)),
+        )
+        .add_systems(
+            OnExit(EncounterState::OutcomeResolution),
+            end_combat_encounter,
         )
         .add_systems(
             InGameUpdate,
@@ -135,14 +138,14 @@ fn display_combat_resolution(
     }
 }
 
+type CombatantWithUpdatedHealth<'w, 's, 'a> =
+    Query<'w, 's, (Entity, &'a CurrentHealth), (With<Challenger>, Changed<CurrentHealth>)>;
+
 fn end_combat_encounter(
-    challengers: Query<(Entity, &CurrentHealth), (With<Challenger>, Changed<CurrentHealth>)>,
+    challengers: CombatantWithUpdatedHealth,
     player: Query<&CurrentHealth, With<Player>>,
     mut commands: Commands,
 ) {
-    if challengers.is_empty() {
-        return;
-    }
     for player in player.iter() {
         if player.0 == 0 {
             commands.insert_resource(NextState(Some(GameState::Failed)));
@@ -150,6 +153,7 @@ fn end_combat_encounter(
     }
     for (entity, challenger) in challengers.iter() {
         if challenger.0 == 0 {
+            info!("Challenger Reduced to ZERO {entity:?}");
             commands.entity(entity).insert(ChallengerCompleted);
         }
     }

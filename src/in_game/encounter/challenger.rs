@@ -14,6 +14,7 @@ use super::{
     actions::{
         ActionChoice, ActionDefinition, ActionTarget, ChallengerActionBundle, PlayerActionBundle,
     },
+    encounter_resolution::ChallengerCompleted,
     health::MaxHealth,
     player::Player,
     sequencing::{EncounterState, PublishAvailableActions},
@@ -63,7 +64,7 @@ impl Challengers {
 
 fn publish_challenger_action(
     mut commands: Commands,
-    challengers: Query<(Entity, &Challenger)>,
+    challengers: Query<(Entity, &Challenger), Without<ChallengerCompleted>>,
     players: Query<Entity, With<Player>>,
     mut global_rng: ResMut<GlobalRng>,
 ) {

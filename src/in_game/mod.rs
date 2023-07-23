@@ -1,4 +1,4 @@
-mod encounter;
+pub mod encounter;
 mod factions;
 mod game_completed;
 mod game_over;

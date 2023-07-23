@@ -4,7 +4,7 @@ use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 use bevy_turborand::TurboRand;
 use serde::Deserialize;
 
-use crate::in_game::encounter::encounter_setup_types::EncounterInitialDetails;
+use crate::in_game::encounter::encounter_setup_types::{EncounterInitialDetails, Encounters};
 
 pub struct MissionAssetsPlugin;
 
@@ -36,7 +36,7 @@ pub struct MissionGenerationInfo {
 }
 
 impl MissionGenerationInfo {
-    pub fn mission(&self, rng: &mut impl TurboRand) -> Mission {
+    pub fn mission(&self, rng: &mut impl TurboRand, encounters: &Encounters) -> Mission {
         let title = rng
             .sample(&self.titles)
             .cloned()
@@ -48,10 +48,7 @@ impl MissionGenerationInfo {
             .map(|encounter_names| {
                 encounter_names
                     .iter()
-                    .map(|encounter_name| EncounterInitialDetails {
-                        title: Some(encounter_name.to_string()),
-                        ..Default::default()
-                    })
+                    .filter_map(|encounter_name| encounters.0.get(encounter_name.as_str()).cloned())
                     .collect()
             })
             .collect();

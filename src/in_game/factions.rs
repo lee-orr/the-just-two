@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-#[derive(Debug, Clone, Copy, Reflect)]
+use bevy_inspector_egui::InspectorOptions;
+use serde::Deserialize;
+#[derive(Debug, Clone, Copy, Reflect, Deserialize, InspectorOptions)]
 pub enum Faction {
     Knights,
     Druids,

@@ -12,6 +12,7 @@ use crate::materialized_scene::MaterializedSceneReference;
 use super::{
     actions::{ActionChoice, ActionDefinition, ActionTarget, ActionType, PlayerActionBundle},
     challenger::Challenger,
+    encounter_resolution::ChallengerCompleted,
     health::{CurrentHealth, MaxHealth},
     sequencing::{EncounterState, PublishAvailableActions},
 };
@@ -58,7 +59,7 @@ impl Players {
 fn publish_combat_actions(
     mut commands: Commands,
     players: Query<(Entity, &Player)>,
-    challengers: Query<(Entity, &Challenger, &CurrentHealth)>,
+    challengers: Query<(Entity, &Challenger, &CurrentHealth), Without<ChallengerCompleted>>,
 ) {
     for (entity, player) in players.iter() {
         commands.entity(entity).with_children(|p| {

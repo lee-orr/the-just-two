@@ -4,7 +4,10 @@ use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 
 use crate::{
     app_state::AppState,
-    in_game::{mission::mission_types::Missions, story::Story, Challengers, Locations, Players},
+    in_game::{
+        encounter::encounter_setup_types::Encounters, mission::mission_types::Missions,
+        story::Story, Challengers, Locations, Players,
+    },
 };
 
 pub struct MainGameAssetPlugin;
@@ -56,6 +59,8 @@ pub struct MainGameAssets {
     pub story: Handle<Story>,
     #[asset(path = "missions.ms.yaml")]
     pub missions: Handle<Missions>,
+    #[asset(path = "encounters.en.yaml")]
+    pub encounters: Handle<Encounters>,
 
     #[asset(path = "textures/color-pallet-labelled.png")]
     pub default_color_pallet: Handle<Image>,

@@ -5,6 +5,7 @@ escape:
   encounters:
     - - escape_building
       - find_hiding_spot
+      - distract_enemies
     - - sneak_past_enemies
       - save_from_building
     - - lead_out_of_town

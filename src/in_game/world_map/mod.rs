@@ -1,6 +1,7 @@
 use bevy::{prelude::*, utils::HashMap};
 
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
+use bevy_turborand::{DelegatedRng, GlobalRng, TurboRand};
 use bevy_ui_dsl::{node, root, text};
 use bevy_vector_shapes::{prelude::ShapePainter, shapes::DiscPainter};
 
@@ -19,7 +20,11 @@ use crate::{
 };
 
 use super::{
-    encounter::powers::Power, game_state::GameState, mission::mission_types::Mission, InGameUpdate,
+    encounter::powers::Power,
+    game_state::GameState,
+    mission::mission_types::{Mission, Missions},
+    story::Phase,
+    InGameUpdate,
 };
 
 pub struct WorldMapPlugin;
@@ -30,7 +35,11 @@ impl Plugin for WorldMapPlugin {
             .register_type::<EncounterLocation>()
             .add_systems(
                 OnEnter(GameState::WorldMap),
-                (spawn_world_map, draw_available_powers),
+                (
+                    spawn_world_map,
+                    draw_available_powers,
+                    generate_potential_missions,
+                ),
             )
             .add_systems(OnExit(GameState::WorldMap), clear_world_map)
             .add_systems(
@@ -76,8 +85,6 @@ fn spawn_world_map(
     mut materials: ResMut<Assets<ToonMaterial>>,
     camera: Query<Entity, With<Camera3d>>,
 ) {
-    commands.insert_resource(PotentialMissions::default());
-
     commands.insert_resource(AmbientLight {
         color: Color::rgba_u8(32, 20, 19, 255),
         brightness: 0.02,
@@ -110,6 +117,27 @@ fn spawn_world_map(
             }),
         ));
     }
+}
+
+fn generate_potential_missions(
+    mut commands: Commands,
+    phase: Res<Phase>,
+    mut global_rng: ResMut<GlobalRng>,
+    assets: Res<MainGameAssets>,
+    missions: Res<Assets<Missions>>,
+) {
+    let Some(missions) = missions.get(&assets.missions) else {
+        return;
+    };
+    let rng = global_rng.get_mut();
+    let select_missions = rng.sample_multiple(&phase.missions, phase.simulatneous_missions);
+    let locations = rng.sample_multiple_iter(0..NUM_LOCATIONS_ON_MAP, phase.simulatneous_missions);
+    let result = locations
+        .iter()
+        .zip(select_missions.iter())
+        .filter_map(|(a, b)| missions.0.get(b.as_str()).map(|v| (*a, v.mission(rng))))
+        .collect();
+    commands.insert_resource(PotentialMissions(result));
 }
 
 fn clear_world_map(

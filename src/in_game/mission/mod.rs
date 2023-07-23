@@ -6,7 +6,7 @@ use bevy_inspector_egui::InspectorOptions;
 use bevy_ui_dsl::{root, text};
 
 use crate::ui::{
-    buttons::{focus_button, TypedFocusedButtonQuery},
+    buttons::{focus_button, focused_button_activated, TypedFocusedButtonQuery},
     classes::*,
     intermediary_node_bundles::IntoIntermediaryNodeBundle,
 };
@@ -16,6 +16,7 @@ use self::mission_types::{Mission, MissionAssetsPlugin, MissionStage};
 use super::{
     encounter::encounter_setup_types::{self},
     game_state::GameState,
+    InGameUpdate,
 };
 
 pub struct MissionPlugin;
@@ -24,26 +25,12 @@ impl Plugin for MissionPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(MissionAssetsPlugin)
             .register_type::<UiButton>()
-        .add_systems(
-            OnEnter(GameState::Mission),
-            draw_encounter_selection_ui,
-        )
-        .add_systems(OnExit(GameState::Mission), clear_world_map)
-        // .add_systems(
-        //     Update,
-        //     (
-        //         draw_encounter_locations,
-        //         find_encounter_locations,
-        //         draw_encounter_selection_ui,
-        //         update_encounter_selection_ui_position,
-        //     )
-        //         .run_if(in_state(GameState::Mission)),
-        // )
-        // .add_systems(
-        //     InGameUpdate,
-        //     (focused_button_activated.pipe(process_input)).run_if(in_state(GameState::Mission)),
-        // )
-        ;
+            .add_systems(OnEnter(GameState::Mission), draw_encounter_selection_ui)
+            .add_systems(OnExit(GameState::Mission), clear_world_map)
+            .add_systems(
+                InGameUpdate,
+                (focused_button_activated.pipe(process_input)).run_if(in_state(GameState::Mission)),
+            );
     }
 }
 
@@ -100,6 +87,7 @@ fn process_input(
     In(focused): In<Option<Entity>>,
     mut commands: Commands,
     interaction_query: TypedFocusedButtonQuery<'_, '_, '_, UiButton>,
+    mission_stage: Res<MissionStage>,
 ) {
     let Some(focused) = focused else {
         return;
@@ -108,5 +96,6 @@ fn process_input(
         return;
     };
     commands.insert_resource(btn.0.clone());
+    commands.insert_resource(MissionStage(mission_stage.0 + 1));
     commands.insert_resource(NextState(Some(GameState::Encounter)));
 }

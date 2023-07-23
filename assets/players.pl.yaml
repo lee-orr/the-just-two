@@ -12,6 +12,16 @@ player_druid:
           - dice: D12
       action_type: !Attack
         base_damage: 2
+    - choice:
+        title: Shoot **
+        content: "A ranged"
+        fail: 3
+        success: 6
+        critical_success: 8
+        dice_pool:
+          - dice: D8
+      action_type: !Attack
+        base_damage: 2
   scene:
     gltf: "models/base-models.gltf"
     scene: "Scene"

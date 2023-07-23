@@ -17,4 +17,14 @@ monster:
           - dice: D8
       action_type: !Attack
         base_damage: 1
+    - choice:
+        title: Defend From Heavy Attack
+        content: "An intense attack from **"
+        fail: 3
+        success: 7
+        critical_success: 8
+        dice_pool:
+          - dice: D10
+      action_type: !Attack
+        base_damage: 3
   published_actions: []

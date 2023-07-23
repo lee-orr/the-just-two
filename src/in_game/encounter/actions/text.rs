@@ -3,10 +3,7 @@ use bevy_ui_dsl::*;
 
 use crate::{
     in_game::{
-        encounter::{
-            action_resolutions::ActiveResolution, encounter_resolution::EncounterComplete,
-            sequencing::EncounterState, EncounterEntity,
-        },
+        encounter::{action_resolutions::ActiveResolution, sequencing::EncounterState},
         InGameUpdate,
     },
     ui::{
@@ -88,9 +85,6 @@ fn display_text_resolution(
     if let Some(next_button) = next_button {
         commands.entity(next_button).insert(Button);
     }
-
-    // END ENCOUNTER AFTER TEXT RESOLUTION - TODO REMOVE
-    commands.spawn((EncounterEntity, EncounterComplete));
 }
 
 fn process_input(

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::in_game::game_state::GameState;
 
-use super::sequencing::EncounterState;
+use super::{challenger::Challenger, sequencing::EncounterState};
 
 pub struct EncounterResolutionPlugin;
 
@@ -26,10 +26,13 @@ exit_encounter
 }
 
 #[derive(Component)]
-pub struct EncounterComplete;
+pub struct ChallengerCompleted;
 
-fn check_encounter_state(mut commands: Commands, query: Query<Entity, With<EncounterComplete>>) {
-    let next_state = if query.is_empty() {
+fn check_encounter_state(
+    mut commands: Commands,
+    query: Query<Entity, (With<Challenger>, Without<ChallengerCompleted>)>,
+) {
+    let next_state = if !query.is_empty() {
         EncounterState::ActionChoice
     } else {
         EncounterState::EncounterResolved

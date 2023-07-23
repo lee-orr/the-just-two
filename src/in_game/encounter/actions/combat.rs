@@ -5,8 +5,8 @@ use crate::{
     in_game::{
         encounter::{
             action_resolutions::ActiveResolution, challenger::Challenger,
-            encounter_resolution::EncounterComplete, health::CurrentHealth, player::Player,
-            sequencing::EncounterState, EncounterEntity,
+            encounter_resolution::ChallengerCompleted, health::CurrentHealth, player::Player,
+            sequencing::EncounterState,
         },
         game_state::GameState,
         InGameUpdate,
@@ -136,7 +136,7 @@ fn display_combat_resolution(
 }
 
 fn end_combat_encounter(
-    challengers: Query<&CurrentHealth, With<Challenger>>,
+    challengers: Query<(Entity, &CurrentHealth), (With<Challenger>, Changed<CurrentHealth>)>,
     player: Query<&CurrentHealth, With<Player>>,
     mut commands: Commands,
 ) {
@@ -148,12 +148,11 @@ fn end_combat_encounter(
             commands.insert_resource(NextState(Some(GameState::Failed)));
         }
     }
-    for challenger in challengers.iter() {
-        if challenger.0 > 0 {
-            return;
+    for (entity, challenger) in challengers.iter() {
+        if challenger.0 == 0 {
+            commands.entity(entity).insert(ChallengerCompleted);
         }
     }
-    commands.spawn((EncounterEntity, EncounterComplete));
 }
 
 fn process_input(

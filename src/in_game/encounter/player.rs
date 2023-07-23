@@ -10,7 +10,7 @@ use serde::Deserialize;
 use crate::materialized_scene::MaterializedSceneReference;
 
 use super::{
-    actions::{ActionChoice, ActionDefinition, ActionType, PlayerActionBundle},
+    actions::{ActionChoice, ActionDefinition, ActionTarget, ActionType, PlayerActionBundle},
     challenger::Challenger,
     health::{CurrentHealth, MaxHealth},
     sequencing::{EncounterState, PublishAvailableActions},
@@ -71,15 +71,12 @@ fn publish_combat_actions(
                     p.spawn(PlayerActionBundle {
                         action_choice,
                         action_type: match action.action_type {
-                            super::actions::ActionType::Attack {
-                                base_damage,
-                                target: _,
-                            } => ActionType::Attack {
-                                base_damage,
-                                target: Some(ch_entity),
-                            },
+                            super::actions::ActionType::Attack { base_damage } => {
+                                ActionType::Attack { base_damage }
+                            }
                             _ => action.action_type.clone(),
                         },
+                        target: ActionTarget(Some(ch_entity)),
                     });
                 }
             }

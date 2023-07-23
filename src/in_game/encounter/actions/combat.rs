@@ -18,7 +18,7 @@ use crate::{
     },
 };
 
-use super::{ActionChoice, ActionType, ChallengerAction, Resolution};
+use super::{ActionChoice, ActionTarget, ActionType, ChallengerAction, Resolution};
 
 pub struct CombatActionPlugin;
 
@@ -42,30 +42,32 @@ struct Screen;
 #[derive(Component)]
 pub struct Button;
 
+type CurrentResolutionQuery<'w, 's, 'a> = Query<
+    'w,
+    's,
+    (
+        Entity,
+        &'a ActionChoice,
+        &'a Resolution,
+        &'a ActionType,
+        &'a ActionTarget,
+        Has<ChallengerAction>,
+    ),
+    Added<ActiveResolution>,
+>;
+
 fn display_combat_resolution(
     mut commands: Commands,
-    resolution: Query<
-        (
-            Entity,
-            &ActionChoice,
-            &Resolution,
-            &ActionType,
-            Has<ChallengerAction>,
-        ),
-        Added<ActiveResolution>,
-    >,
+    resolution: CurrentResolutionQuery,
     mut targetable: Query<&mut CurrentHealth>,
     asset_server: Res<AssetServer>,
 ) {
-    let Ok((_entity, choice, resolution, action_type, is_challanger)) = resolution.get_single()
+    let Ok((_entity, choice, resolution, action_type, target, is_challanger)) =
+        resolution.get_single()
     else {
         return;
     };
-    let ActionType::Attack {
-        base_damage,
-        target,
-    } = action_type
-    else {
+    let ActionType::Attack { base_damage } = action_type else {
         return;
     };
     let (result_text, damage) = if is_challanger {
@@ -83,8 +85,7 @@ fn display_combat_resolution(
             super::ActionResult::CriticalSuccess => ("Amazing Success!", (*base_damage) * 2),
         }
     };
-    if let Some(target) = target {
-        info!("Has target...");
+    if let ActionTarget(Some(target)) = target {
         if let Ok(mut target) = targetable.get_mut(*target) {
             info!("Target took damage!");
             target.0 = target.0.saturating_sub(damage as usize);

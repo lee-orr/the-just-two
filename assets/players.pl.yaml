@@ -41,6 +41,16 @@ player_knight:
           - dice: D12
       action_type: !Attack
         base_damage: 3
+    - choice:
+        title: Shoot **
+        content: "A ranged"
+        fail: 2
+        success: 5
+        critical_success: 8
+        dice_pool:
+          - dice: D8
+      action_type: !Attack
+        base_damage: 2
   scene:
     gltf: "models/base-models.gltf"
     scene: "Scene"

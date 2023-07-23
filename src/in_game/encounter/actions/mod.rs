@@ -87,6 +87,7 @@ pub struct ChallengerAction;
 pub struct PlayerActionBundle {
     pub action_choice: ActionChoice,
     pub action_type: ActionType,
+    pub target: ActionTarget,
 }
 
 #[derive(Bundle, Default)]
@@ -94,7 +95,12 @@ pub struct ChallengerActionBundle {
     pub action_choice: ActionChoice,
     pub challenger_action: ChallengerAction,
     pub action_type: ActionType,
+    pub target: ActionTarget,
 }
+
+#[derive(Component, InspectorOptions, Reflect, Clone, Debug, Default)]
+#[reflect(InspectorOptions)]
+pub struct ActionTarget(pub Option<Entity>);
 
 #[derive(Component, InspectorOptions, Reflect, Deserialize, Default, Clone, Debug)]
 #[reflect(InspectorOptions)]
@@ -103,7 +109,6 @@ pub enum ActionType {
     Text,
     Attack {
         base_damage: u8,
-        target: Option<Entity>,
     },
 }
 

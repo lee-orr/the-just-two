@@ -24,7 +24,7 @@ monster:
         success: 7
         critical_success: 8
         dice_pool:
-          - dice: D10
+          - dice: D12
       action_type: !Attack
         base_damage: 3
   published_actions: []

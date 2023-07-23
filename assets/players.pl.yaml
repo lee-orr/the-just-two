@@ -1,5 +1,7 @@
 player_druid:
   name: player_druid
+  health: 10
+  combat_actions: []
   scene:
     gltf: "models/base-models.gltf"
     scene: "Scene"
@@ -7,6 +9,8 @@ player_druid:
       - "textures/color-pallet-1.png"
 player_knight:
   name: player_knight
+  health: 15
+  combat_actions: []
   scene:
     gltf: "models/base-models.gltf"
     scene: "Scene"

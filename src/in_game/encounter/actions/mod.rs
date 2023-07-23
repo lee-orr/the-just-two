@@ -20,7 +20,7 @@ impl Plugin for ActionPlugin {
     }
 }
 
-#[derive(Component, InspectorOptions, Reflect)]
+#[derive(Component, InspectorOptions, Reflect, Deserialize, Clone, Debug)]
 #[reflect(InspectorOptions)]
 pub struct ActionChoice {
     pub title: String,
@@ -94,9 +94,19 @@ pub struct ChallengerActionBundle {
     pub action_type: ActionType,
 }
 
-#[derive(Component, InspectorOptions, Reflect, Deserialize, Default)]
+#[derive(Component, InspectorOptions, Reflect, Deserialize, Default, Clone, Debug)]
 #[reflect(InspectorOptions)]
 pub enum ActionType {
     #[default]
     Text,
+    Attack {
+        base_damage: u8,
+        target: Option<Entity>,
+    },
+}
+
+#[derive(Reflect, InspectorOptions, Deserialize, Default, Clone, Debug)]
+pub struct ActionDefinition {
+    pub choice: ActionChoice,
+    pub action_type: ActionType,
 }

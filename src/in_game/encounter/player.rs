@@ -10,8 +10,9 @@ use serde::Deserialize;
 use crate::materialized_scene::MaterializedSceneReference;
 
 use super::{
-    actions::{ActionChoice, PlayerActionBundle},
-    dice_pools::{DicePool, DicePoolType, DiceType, InitialPools},
+    actions::{ActionChoice, ActionDefinition, ActionType, PlayerActionBundle},
+    challenger::Challenger,
+    health::{CurrentHealth, MaxHealth},
     sequencing::{EncounterState, PublishAvailableActions},
 };
 
@@ -25,7 +26,7 @@ impl Plugin for PlayerPlugin {
             .add_plugins(YamlAssetPlugin::<Players>::new(&["pl.yaml"]))
             .add_systems(
                 OnEnter(EncounterState::ActionChoice),
-                say_hello_action.in_set(PublishAvailableActions),
+                publish_combat_actions.in_set(PublishAvailableActions),
             );
     }
 }
@@ -34,11 +35,14 @@ impl Plugin for PlayerPlugin {
 pub struct PlayerReference {
     pub name: String,
     pub scene: MaterializedSceneReference,
+    pub combat_actions: Vec<ActionDefinition>,
+    pub health: MaxHealth,
 }
 
 #[derive(Reflect, InspectorOptions, Component)]
 pub struct Player {
     pub name: String,
+    pub combat_actions: Vec<ActionDefinition>,
 }
 
 #[derive(Reflect, InspectorOptions, Deserialize, TypeUuid)]
@@ -51,53 +55,34 @@ impl Players {
     }
 }
 
-fn say_hello_action(mut commands: Commands, players: Query<(Entity, &Player)>) {
+fn publish_combat_actions(
+    mut commands: Commands,
+    players: Query<(Entity, &Player)>,
+    challengers: Query<(Entity, &Challenger, &CurrentHealth)>,
+) {
     for (entity, player) in players.iter() {
         commands.entity(entity).with_children(|p| {
-            p.spawn(PlayerActionBundle {
-                action_choice: ActionChoice {
-                    title: "Hello!".to_string(),
-                    content: format!("Say Hi as {}", player.name),
-                    fail: 4,
-                    success: 10,
-                    critical_success: 15,
-                    dice_pool: InitialPools::new(vec![
-                        DicePool {
-                            dice: DiceType::D8,
-                            pool: DicePoolType::Single,
+            for (ch_entity, challenger, _health) in challengers.iter() {
+                for action in player.combat_actions.iter() {
+                    let action_choice = ActionChoice {
+                        title: action.choice.title.replace("**", &challenger.name),
+                        ..action.choice.clone()
+                    };
+                    p.spawn(PlayerActionBundle {
+                        action_choice,
+                        action_type: match action.action_type {
+                            super::actions::ActionType::Attack {
+                                base_damage,
+                                target: _,
+                            } => ActionType::Attack {
+                                base_damage,
+                                target: Some(ch_entity),
+                            },
+                            _ => action.action_type.clone(),
                         },
-                        DicePool {
-                            dice: DiceType::D8,
-                            pool: DicePoolType::Single,
-                        },
-                        DicePool {
-                            dice: DiceType::Static { value: 2 },
-                            pool: DicePoolType::Single,
-                        },
-                    ]),
-                },
-                ..Default::default()
-            });
-            p.spawn(PlayerActionBundle {
-                action_choice: ActionChoice {
-                    title: "Goodbye!".to_string(),
-                    content: format!("Say Bye as {}", player.name),
-                    fail: 5,
-                    success: 8,
-                    critical_success: 10,
-                    dice_pool: InitialPools::new(vec![
-                        DicePool {
-                            dice: DiceType::D6,
-                            pool: DicePoolType::Advantage,
-                        },
-                        DicePool {
-                            dice: DiceType::D8,
-                            pool: DicePoolType::Single,
-                        },
-                    ]),
-                },
-                ..Default::default()
-            });
+                    });
+                }
+            }
         });
     }
 }

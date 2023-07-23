@@ -4,4 +4,7 @@ monster:
     gltf: "models/base-models.gltf"
     scene: "Scene"
     pallet:
-      - "textures/color-pallet-2.png"
+      - "textures/color-pallet.png"
+  health: 5
+  available_actions: []
+  published_actions: []

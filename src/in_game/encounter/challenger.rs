@@ -5,12 +5,14 @@ use bevy::{
 };
 use bevy_common_assets::yaml::YamlAssetPlugin;
 use bevy_inspector_egui::InspectorOptions;
+use bevy_turborand::{DelegatedRng, GlobalRng, TurboRand};
 use serde::Deserialize;
 
 use crate::materialized_scene::MaterializedSceneReference;
 
 use super::{
-    actions::{ActionChoice, ChallengerActionBundle},
+    actions::{ActionDefinition, ChallengerActionBundle, PlayerActionBundle},
+    health::MaxHealth,
     sequencing::{EncounterState, PublishAvailableActions},
 };
 
@@ -24,7 +26,7 @@ impl Plugin for ChallengerPlugin {
             .add_plugins(YamlAssetPlugin::<Challengers>::new(&["ch.yaml"]))
             .add_systems(
                 OnEnter(EncounterState::ActionChoice),
-                say_challenge_action.in_set(PublishAvailableActions),
+                publish_challenger_action.in_set(PublishAvailableActions),
             );
     }
 }
@@ -33,12 +35,17 @@ impl Plugin for ChallengerPlugin {
 pub struct ChallengerReference {
     pub name: String,
     pub scene: MaterializedSceneReference,
+    pub available_actions: Vec<ActionDefinition>,
+    pub published_actions: Vec<ActionDefinition>,
+    pub health: Option<MaxHealth>,
 }
 
 #[derive(Reflect, InspectorOptions, Component)]
 pub struct Challenger {
     pub id: usize,
     pub name: String,
+    pub available_actions: Vec<ActionDefinition>,
+    pub published_actions: Vec<ActionDefinition>,
 }
 
 #[derive(Reflect, InspectorOptions, Deserialize, TypeUuid)]
@@ -51,23 +58,29 @@ impl Challengers {
     }
 }
 
-fn say_challenge_action(mut commands: Commands, challengers: Query<(Entity, &Challenger)>) {
+fn publish_challenger_action(
+    mut commands: Commands,
+    challengers: Query<(Entity, &Challenger)>,
+    mut global_rng: ResMut<GlobalRng>,
+) {
+    let rng = global_rng.get_mut();
+
     for (entity, challenger) in challengers.iter() {
+        let Some(choice) = rng.sample(&challenger.available_actions) else {
+            continue;
+        };
         commands.entity(entity).with_children(|p| {
             p.spawn(ChallengerActionBundle {
-                action_choice: ActionChoice {
-                    title: "A CHALLENGE!".to_string(),
-                    content: format!(
-                        "I, {} ({}), Challenge you to a game of fiddlesticks!",
-                        challenger.name, challenger.id
-                    ),
-                    fail: 4,
-                    success: 10,
-                    critical_success: 15,
-                    ..Default::default()
-                },
+                action_choice: choice.choice.clone(),
+                action_type: choice.action_type.clone(),
                 ..default()
             });
+            for choice in challenger.published_actions.iter() {
+                p.spawn(PlayerActionBundle {
+                    action_choice: choice.choice.clone(),
+                    action_type: choice.action_type.clone(),
+                });
+            }
         });
     }
 }

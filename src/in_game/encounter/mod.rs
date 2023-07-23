@@ -25,11 +25,7 @@ use bevy_asset_loader::prelude::DynamicAssets;
 use bevy_inspector_egui::quick::StateInspectorPlugin;
 
 use crate::{
-    in_game::encounter::{
-        challenger::Challenger,
-        health::{CurrentHealth, MaxHealth},
-        player::Player,
-    },
+    in_game::encounter::{challenger::Challenger, health::CurrentHealth, player::Player},
     materialized_scene::MaterializedSceneBundle,
 };
 
@@ -149,11 +145,12 @@ fn spawn_encounter(
             commands.spawn((
                 Player {
                     name: player.name.clone(),
+                    combat_actions: player.combat_actions.clone(),
                 },
                 bundle,
                 EncounterEntity,
-                CurrentHealth(5),
-                MaxHealth(7),
+                CurrentHealth(player.health.0),
+                player.health,
                 Name::new("Player"),
             ));
         }
@@ -183,17 +180,20 @@ fn spawn_encounter(
                         },
                         ..bundle.clone()
                     };
-                    commands.spawn((
+                    let mut entity = commands.spawn((
                         Challenger {
                             id: challenger_id,
                             name: challenger.name.clone(),
+                            available_actions: challenger.available_actions.clone(),
+                            published_actions: challenger.published_actions.clone(),
                         },
-                        CurrentHealth(2),
-                        MaxHealth(5),
                         bundle,
                         EncounterEntity,
                         Name::new(format!("{} - {challenger_id}", challenger.name)),
                     ));
+                    if let Some(health) = challenger.health {
+                        entity.insert((health, CurrentHealth(health.0)));
+                    }
                     challenger_id += 1;
                 }
             }

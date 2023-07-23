@@ -4,6 +4,7 @@ use bevy_vector_shapes::{
     prelude::ShapePainter,
     shapes::{Cap, LinePainter},
 };
+use serde::Deserialize;
 
 use crate::{in_game::game_state::GameState, ui::colors};
 
@@ -23,7 +24,7 @@ impl Plugin for HealthPlugin {
 #[derive(Component, Reflect, InspectorOptions, Default)]
 pub struct CurrentHealth(pub usize);
 
-#[derive(Component, Reflect, InspectorOptions, Default)]
+#[derive(Component, Reflect, InspectorOptions, Default, Clone, Copy, Debug, Deserialize)]
 pub struct MaxHealth(pub usize);
 
 const HEALTH_BAR_END: Vec3 = Vec3::new(50., 0., 0.);

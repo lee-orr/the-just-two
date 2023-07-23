@@ -2,6 +2,7 @@ use bevy::{prelude::*, reflect::Reflect};
 use bevy_inspector_egui::{prelude::ReflectInspectorOptions, InspectorOptions};
 use bevy_turborand::TurboRand;
 use bevy_ui_dsl::{node, UiChildBuilder};
+use serde::Deserialize;
 
 use crate::{
     assets::MainGameAssets,
@@ -17,7 +18,7 @@ pub trait Roll {
     fn roll(&self, rng: &mut impl TurboRand) -> u8;
 }
 
-#[derive(InspectorOptions, Reflect, Clone, Copy, PartialEq, Eq)]
+#[derive(InspectorOptions, Reflect, Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
 #[reflect(InspectorOptions)]
 pub enum DiceType {
     D2,
@@ -75,7 +76,7 @@ impl DisplayBundle for DiceType {
     }
 }
 
-#[derive(InspectorOptions, Reflect, Default, PartialEq, Eq, Clone, Copy)]
+#[derive(InspectorOptions, Reflect, Default, PartialEq, Eq, Clone, Debug, Copy, Deserialize)]
 #[reflect(InspectorOptions)]
 pub enum DicePoolType {
     #[default]
@@ -83,7 +84,7 @@ pub enum DicePoolType {
     Advantage,
 }
 
-#[derive(InspectorOptions, Reflect, Component, Clone, Copy, Default)]
+#[derive(InspectorOptions, Reflect, Component, Clone, Debug, Copy, Default, Deserialize)]
 #[reflect(InspectorOptions)]
 pub struct DicePool {
     pub dice: DiceType,
@@ -151,7 +152,7 @@ impl DisplayBundle for DicePool {
     }
 }
 
-#[derive(InspectorOptions, Reflect, Component)]
+#[derive(InspectorOptions, Reflect, Component, Deserialize, Clone, Debug)]
 #[reflect(InspectorOptions)]
 pub struct InitialPools(Vec<DicePool>);
 

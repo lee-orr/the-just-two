@@ -255,7 +255,12 @@ fn draw_encounter_selection_ui(
                     apply_encounter_state,
                     p,
                     |p| {
-                        text(encounter.title.as_str(), (), standard_text, p);
+                        text(
+                            encounter.title.as_str(),
+                            (),
+                            (standard_text, button_text),
+                            p,
+                        );
                     },
                 ));
             },

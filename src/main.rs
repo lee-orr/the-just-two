@@ -54,7 +54,7 @@ fn main() {
             RngPlugin::default(),
             SequentialActionsPlugin,
         ))
-        .insert_resource(ClearColor(ui::colors::DEFAULT_CLEAR))
+        .insert_resource(ClearColor(ui::colors::SCREEN_BACKGROUND_COLOR))
         .insert_resource(DEFAULT_AMBIENT)
         .add_plugins((
             ToonMaterialPlugin,

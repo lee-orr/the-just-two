@@ -76,19 +76,30 @@ fn draw_encounter_selection_ui(
     let r = root(mission_root, &asset_server, &mut commands, |p| {
         node(mission_container, p, |p| {
             node(mission_encounter_title.nb(), p, |p| {
-                text(title, (), (main_text, knight_text), p);
+                text(title, (), main_text, p);
             });
 
             buttons = encounters
                 .iter()
                 .map(|encounter| {
-                    let button =
-                        focus_button(encounter_listing.nb(), apply_encounter_state, p, |p| {
+                    let button = focus_button(
+                        match encounter.player_faction {
+                            super::factions::Faction::Knights => encounter_knight_listing,
+                            super::factions::Faction::Druids => encounter_druid_listing,
+                        }
+                        .nb(),
+                        match encounter.player_faction {
+                            super::factions::Faction::Knights => apply_encounter_knight_state,
+                            super::factions::Faction::Druids => apply_encounter_druid_state,
+                        },
+                        p,
+                        |p| {
                             text(
                                 encounter.title.clone().unwrap_or("Encounter".to_string()),
                                 (),
                                 (
                                     standard_text,
+                                    button_text,
                                     match encounter.player_faction {
                                         super::factions::Faction::Knights => knight_text,
                                         super::factions::Faction::Druids => druid_text,
@@ -96,7 +107,8 @@ fn draw_encounter_selection_ui(
                                 ),
                                 p,
                             );
-                        });
+                        },
+                    );
                     (button, encounter)
                 })
                 .collect();

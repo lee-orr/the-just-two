@@ -120,6 +120,14 @@ pub fn druid_text(assets: &AssetServer, t: &mut TextStyle) {
     t.font = assets.load("fonts/IMMORTAL.ttf");
 }
 
+pub fn knight_text_color(assets: &AssetServer, t: &mut TextStyle) {
+    t.color = KNIGHTS_MAIN;
+}
+
+pub fn druid_text_color(assets: &AssetServer, t: &mut TextStyle) {
+    t.color = DRUIDS_MAIN;
+}
+
 pub fn span(b: &mut dyn IntermediaryNodeBundleHandler) {
     b.style().display = Display::Flex;
     b.style().flex_direction = FlexDirection::Row;

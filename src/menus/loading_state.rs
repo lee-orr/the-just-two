@@ -18,14 +18,22 @@ const LOADING_ANIMATION_SIZE: f32 = 50.0;
 const LOADING_ANIMATION_VERTICAL: f32 = 20.0;
 const CIRCLE_SIZE: f32 = 15.;
 const CIRCLE_DELAY: f32 = 2.;
-const NUM_CIRCLES: u8 = 3;
+const NUM_CIRCLES: u8 = 4;
 
 fn draw_loading(mut painter: ShapePainter, time: Res<Time>) {
     painter.set_2d();
 
     let left_edge = (NUM_CIRCLES as f32 * LOADING_ANIMATION_SIZE) / -2.;
 
-    for circle in 0..NUM_CIRCLES {
+    for (circle, color) in [
+        colors::KNIGHTS_MAIN,
+        colors::DRUIDS_MAIN,
+        colors::KNIGHTS_SECONDARY,
+        colors::DRUIDS_SECONDARY,
+    ]
+    .iter()
+    .enumerate()
+    {
         let time_offset =
             (time.elapsed_seconds() - CIRCLE_DELAY * (circle as f32)).mul(LOADING_ANIMATION_SPEED);
         let offset_y = time_offset.cos();
@@ -36,7 +44,7 @@ fn draw_loading(mut painter: ShapePainter, time: Res<Time>) {
         );
 
         painter.set_translation(location);
-        painter.color = colors::PRIMARY_COLOR;
+        painter.color = *color;
         painter.circle(CIRCLE_SIZE);
     }
 }

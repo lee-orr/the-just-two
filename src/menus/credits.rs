@@ -6,6 +6,7 @@ use crate::{
     ui::{
         buttons::{focus_text_button, focused_button_activated},
         classes::*,
+        colors::SCREEN_BACKGROUND_COLOR,
         intermediary_node_bundles::*,
     },
 };
@@ -26,16 +27,18 @@ impl Plugin for CreditsPlugin {
 struct Screen;
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.insert_resource(AmbientLight {
-        color: Color::ORANGE_RED,
-        brightness: 0.02,
-    });
+    commands.insert_resource(ClearColor(SCREEN_BACKGROUND_COLOR));
 
     let r = root(c_root, &asset_server, &mut commands, |p| {
         node(primary_box, p, |p| {
             node((span.nb(), primary_box_main.nb()), p, |p| {
-                text("The Just", (), (main_text, knight_text), p);
-                text("Two", (), (main_text, druid_text), p);
+                text(
+                    "The Just",
+                    (),
+                    (main_text, knight_text, knight_text_color),
+                    p,
+                );
+                text("Two", (), (main_text, druid_text, druid_text_color), p);
             });
             text("by Lee-Orr", primary_box_item.nb(), standard_text, p);
             text(

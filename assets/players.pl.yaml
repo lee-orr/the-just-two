@@ -1,5 +1,5 @@
 player_druid:
-  name: player_druid
+  name: Hvari
   health: 10
   combat_actions:
     - choice:
@@ -24,11 +24,11 @@ player_druid:
         base_damage: 2
   scene:
     gltf: "models/base-models.gltf"
-    scene: "Root"
+    scene: "Hvari"
     pallet:
       - "textures/color-pallet-1.png"
 player_knight:
-  name: player_knight
+  name: Torsin
   health: 15
   combat_actions:
     - choice:
@@ -53,6 +53,6 @@ player_knight:
         base_damage: 2
   scene:
     gltf: "models/base-models.gltf"
-    scene: "Root"
+    scene: "Torsin"
     pallet:
       - "textures/color-pallet-2.png"

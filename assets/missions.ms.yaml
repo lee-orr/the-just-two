@@ -1,39 +1,36 @@
-escape:
+home_under_attack:
   titles:
-    - The Escape
+    - To Spark a War
     - A Home No More
+    - Beginnings
   encounters:
-    - - escape_building
-      - find_hiding_spot
-      - distract_enemies
-    # - - sneak_past_enemies
-    #   - save_from_building
-    # - - lead_out_of_town
+    - - save_towns_folk
+    - - the_hounds_arrive
 
 rescue:
   titles:
-    - A Missing Mother
+    - The Missing, The Lost
     - The Kidnapping
   encounters:
-    - - an_encounter
+    - - approaching_the_castle
+      - a_subtle_approach
+    - - the_gate
+      - the_campfire
 
 defend:
   titles:
     - A Troubled Town
-    - Rebuffing Rabid Rage
+    - Ending the Seige
   encounters:
-    - - an_encounter
+    - - nearly_here
+      - from_the_parapets
+    - - the_forst_flames
+      - the_fallen_gates
 
 chase_bandits:
   titles:
     - Bundits and Buffons
     - No Room for Both of Us
   encounters:
-    - - an_encounter
-
-return_item:
-  titles:
-    - The Sacred Chalice
-    - A Diamond in the Shine
-  encounters:
-    - - an_encounter
+    - - on_the_run
+      - and_stay_out

@@ -168,9 +168,7 @@ impl<'a> SceneBundler<'a> {
         let gltf = self.2.get(gltf)?;
 
         info!("got gltf");
-        let camera_node = gltf
-            .named_nodes
-            .get(&format!("{}:camera", reference.scene))?;
+        let camera_node = gltf.named_nodes.get("camera_pos")?;
         info!("found camera node");
         let camera_node = self.3.get(camera_node)?;
         info!("got camera transform");
@@ -186,11 +184,14 @@ impl<'a> SceneBundler<'a> {
         let gltf = self.2.get(gltf)?;
 
         info!("got gltf");
-        let player_node = gltf.named_nodes.get(&format!("{}:p", reference.scene))?;
+        let player_node = gltf.named_nodes.get("player_pos")?;
         info!("found player node");
         let player_node = self.3.get(player_node)?;
         info!("got player transform");
-        Some(player_node.transform)
+        let mut transform = player_node.transform;
+        transform.rotate_local_x(-1. * PI / 2.);
+        transform.rotate_local_y(PI * -0.7);
+        Some(transform)
     }
 
     pub fn challenger_position(
@@ -204,12 +205,13 @@ impl<'a> SceneBundler<'a> {
         let gltf = self.2.get(gltf)?;
 
         info!("got gltf");
-        let challenger_node = gltf
-            .named_nodes
-            .get(&format!("{}:ch{id}", reference.scene))?;
+        let challenger_node = gltf.named_nodes.get(&format!("ch{id}"))?;
         info!("found challenger node");
         let challenger_node = self.3.get(challenger_node)?;
         info!("got challenger transform");
-        Some(challenger_node.transform)
+        let mut transform = challenger_node.transform;
+        transform.rotate_local_x(-1. * PI / 2.);
+        transform.rotate_local_y(PI * -1.3);
+        Some(transform)
     }
 }

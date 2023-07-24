@@ -2,15 +2,15 @@ grass:
   name: grass
   challenger_slots: 3
   scene:
-    gltf: "models/ground.gltf"
-    scene: "Grass"
+    gltf: "models/locations.gltf"
+    scene: "Hills"
     pallet:
       - "textures/color-pallet-2.png"
 sand:
   name: sand
   challenger_slots: 3
   scene:
-    gltf: "models/ground.gltf"
-    scene: "Sand"
+    gltf: "models/locations.gltf"
+    scene: "Sandy"
     pallet:
       - "textures/color-pallet-2.png"

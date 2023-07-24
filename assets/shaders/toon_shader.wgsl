@@ -20,8 +20,12 @@ fn fragment(
 ) -> @location(0) vec4<f32> {
     let layer = i32(mesh.world_position.x) & 0x3;
 
+    let color =  textureSample(base_color_texture, base_color_sampler, mesh.uv);
+
     var pbr_input: fns::PbrInput = fns::pbr_input_new();
-    pbr_input.material.base_color = vec4<f32>(1., 1., 1., 1.);
+    
+    pbr_input.material.base_color =color;
+    // pbr_input.material.base_color = vec4<f32>(1., 1., 1., 1.);
 
     pbr_input.frag_coord = mesh.position;
     pbr_input.world_position = mesh.world_position;
@@ -57,8 +61,6 @@ fn fragment(
 
     let l = max_p_min / 2.0;
 
-    let color =  textureSample(base_color_texture, base_color_sampler, mesh.uv);
-
     let shadow = textureSample(shadow_color_texture, shadow_color_sampler, vec2<f32>(l, 0.5));
 
     let result_shadeless = clamp(result / l, vec4<f32>(0., 0., 0., 0.), vec4<f32>(1., 1., 1., 1.));
@@ -67,4 +69,5 @@ fn fragment(
     let shaded_with_hue = result_shadeless * shaded;   
 
     return 1. - (1. - shaded) * (1. - shaded_with_hue);
+    // return result;
 }

@@ -24,7 +24,7 @@ player_druid:
         base_damage: 2
   scene:
     gltf: "models/base-models.gltf"
-    scene: "Scene"
+    scene: "Root"
     pallet:
       - "textures/color-pallet-1.png"
 player_knight:
@@ -53,6 +53,6 @@ player_knight:
         base_damage: 2
   scene:
     gltf: "models/base-models.gltf"
-    scene: "Scene"
+    scene: "Root"
     pallet:
       - "textures/color-pallet-2.png"

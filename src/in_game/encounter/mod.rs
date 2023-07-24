@@ -155,6 +155,7 @@ fn spawn_encounter(
         }
 
         if let Some(transform) = bundler.camera_position(&location.scene) {
+            info!("Placing Camera");
             for camera in camera.iter() {
                 commands.entity(camera).insert(transform);
             }
@@ -164,6 +165,7 @@ fn spawn_encounter(
             bundler.player_position(&location.scene),
             bundler.scene(&player.scene),
         ) {
+            info!("Placing Player");
             let bundle = MaterializedSceneBundle {
                 transform: TransformBundle {
                     local: transform,
@@ -196,6 +198,8 @@ fn spawn_encounter(
                     if challenger_id >= challenger_slots {
                         break;
                     }
+
+                    info!("Placing Challenger {challenger_id}");
                     let Some(transform) =
                         bundler.challenger_position(&location.scene, challenger_id)
                     else {

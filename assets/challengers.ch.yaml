@@ -2,7 +2,7 @@ monster:
   name: monster
   scene:
     gltf: "models/base-models.gltf"
-    scene: "Scene"
+    scene: "Root"
     pallet:
       - "textures/color-pallet.png"
   health: 5

@@ -24,9 +24,9 @@ player_druid:
         base_damage: 2
   scene:
     gltf: "models/base-models.gltf"
-    scene: "Hvari"
+    scene: "Havri"
     pallet:
-      - "textures/color-pallet-1.png"
+      - "textures/color-pallet-2.png"
 player_knight:
   name: Torsin
   health: 15

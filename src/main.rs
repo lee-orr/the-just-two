@@ -11,8 +11,10 @@ use std::time::Duration;
 use app_state::AppState;
 use assets::{MainGameAssetPlugin, MainGameAssets};
 use bevy::{
-    asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig,
-    input::common_conditions::input_toggle_active, prelude::*,
+    asset::ChangeWatcher,
+    core_pipeline::{clear_color::ClearColorConfig, tonemapping::Tonemapping},
+    input::common_conditions::input_toggle_active,
+    prelude::*,
 };
 
 use bevy_inspector_egui::quick::{StateInspectorPlugin, WorldInspectorPlugin};
@@ -80,6 +82,7 @@ fn setup(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
         transform: Transform::from_translation(Vec3::new(-2., 5., -5.))
             .looking_at(Vec3::Y, Vec3::Y),
+        tonemapping: Tonemapping::AcesFitted,
         ..default()
     });
 
@@ -91,6 +94,7 @@ fn setup(mut commands: Commands) {
         camera_2d: Camera2d {
             clear_color: ClearColorConfig::None,
         },
+        tonemapping: Tonemapping::AcesFitted,
         ..default()
     });
 }

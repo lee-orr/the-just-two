@@ -13,7 +13,7 @@ use crate::{
     ui::{
         buttons::{focus_button, focused_button_activated, TypedFocusedButtonQuery},
         classes::*,
-        colors,
+        colors::{self, DEFAULT_AMBIENT, DEFAULT_CLEAR},
         intermediary_node_bundles::IntoIntermediaryNodeBundle,
         DisplayBundle,
     },
@@ -85,11 +85,8 @@ fn spawn_world_map(
     mut materials: ResMut<Assets<ToonMaterial>>,
     camera: Query<Entity, With<Camera3d>>,
 ) {
-    commands.insert_resource(AmbientLight {
-        color: Color::rgba_u8(32, 20, 19, 255),
-        brightness: 0.02,
-    });
-    commands.insert_resource(ClearColor(Color::rgb(0.75, 0.75, 0.75)));
+    commands.insert_resource(DEFAULT_AMBIENT);
+    commands.insert_resource(ClearColor(DEFAULT_CLEAR));
     let material = materials.add(ToonMaterial {
         color_texture: Some(assets.default_color_pallet.clone()),
         shadow_texture: Some(assets.shadow_gradient.clone()),

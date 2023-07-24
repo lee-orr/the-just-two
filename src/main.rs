@@ -26,7 +26,7 @@ use materialized_scene::SceneSpawnerPlugin;
 use menu::MainMenuPlugin;
 use menus::{credits, loading_state, menu};
 use toon_material::ToonMaterialPlugin;
-use ui::UiPlugin;
+use ui::{colors::DEFAULT_AMBIENT, UiPlugin};
 
 fn main() {
     #[cfg(target_arch = "wasm32")]
@@ -52,7 +52,8 @@ fn main() {
             RngPlugin::default(),
             SequentialActionsPlugin,
         ))
-        .insert_resource(ClearColor(ui::colors::SCREEN_BACKGROUND_COLOR))
+        .insert_resource(ClearColor(ui::colors::DEFAULT_CLEAR))
+        .insert_resource(DEFAULT_AMBIENT)
         .add_plugins((
             ToonMaterialPlugin,
             LoadingScreenPlugin,

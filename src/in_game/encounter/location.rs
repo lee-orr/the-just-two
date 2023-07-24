@@ -32,6 +32,8 @@ pub struct LocationReference {
     pub name: String,
     pub scene: MaterializedSceneReference,
     pub challenger_slots: usize,
+    pub fog: Option<(Color, f32, f32)>,
+    pub ambient: Option<(Color, f32)>,
 }
 
 #[derive(Reflect, InspectorOptions)]

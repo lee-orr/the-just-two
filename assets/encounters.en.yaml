@@ -2,6 +2,7 @@ escape_building:
   title: Escape The Building
   player_faction: Knights
   location: grass
+  introduction: The village rumbles in the night - and the building is filling with smoke. Can you get out?
   challengers:
     - - 2
       - monster
@@ -10,6 +11,7 @@ find_hiding_spot:
   title: Finding a Hiding Spot
   player_faction: Knights
   location: sand
+  introduction: The village is crawling with... well - it's best to not be seen.
   challengers:
     - - 1
       - monster

@@ -23,6 +23,7 @@ impl Plugin for EncounterSetupPlugin {
 #[reflect(Resource, InspectorOptions)]
 pub struct EncounterInitialDetails {
     pub title: Option<String>,
+    pub introduction: Option<String>,
     pub player_faction: Faction,
     pub challengers: Vec<(usize, String)>,
     pub location: Option<String>,
@@ -35,6 +36,7 @@ impl Default for EncounterInitialDetails {
             player_faction: Faction::Knights,
             challengers: vec![(1, "monster".to_string())],
             location: Some("grass".to_string()),
+            introduction: Some("Let me introduce myself".to_string()),
         }
     }
 }

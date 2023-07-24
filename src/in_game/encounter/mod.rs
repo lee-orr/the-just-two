@@ -7,7 +7,7 @@ mod encounter_assets;
 mod encounter_resolution;
 mod health;
 mod introduction;
-mod location;
+pub mod location;
 mod player;
 pub mod powers;
 mod probability_setup;
@@ -27,6 +27,7 @@ use bevy_inspector_egui::quick::StateInspectorPlugin;
 use crate::{
     in_game::encounter::{challenger::Challenger, health::CurrentHealth, player::Player},
     materialized_scene::MaterializedSceneBundle,
+    ui::colors::{DEFAULT_AMBIENT, DEFAULT_CLEAR},
 };
 
 use self::{
@@ -126,6 +127,33 @@ fn spawn_encounter(
         } else {
             error!("Couldn't setup bundle");
         }
+
+        if let Some(fog) = location.fog {
+            commands.insert_resource(ClearColor(fog.0));
+            for camera in camera.iter() {
+                commands.entity(camera).insert(FogSettings {
+                    color: fog.0,
+                    falloff: FogFalloff::Linear {
+                        start: fog.1,
+                        end: fog.2,
+                    },
+                    ..Default::default()
+                });
+            }
+        } else {
+            commands.insert_resource(ClearColor(DEFAULT_CLEAR));
+
+            for camera in camera.iter() {
+                commands.entity(camera).remove::<FogSettings>();
+            }
+        }
+
+        if let Some((color, brightness)) = location.ambient {
+            commands.insert_resource(AmbientLight { color, brightness });
+        } else {
+            commands.insert_resource(DEFAULT_AMBIENT);
+        }
+
         if let Some(transform) = bundler.camera_position(&location.scene) {
             for camera in camera.iter() {
                 commands.entity(camera).insert(transform);

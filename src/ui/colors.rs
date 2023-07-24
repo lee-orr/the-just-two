@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use bevy::prelude::Color;
+use bevy::prelude::{AmbientLight, Color};
 
 pub const SCREEN_BACKGROUND_COLOR: Color = Color::rgb(0.36, 0.47, 0.65);
 pub const BORDER_COLOR: Color = Color::rgb(0.19, 0.25, 0.35);
@@ -32,3 +32,10 @@ pub const ENCOUNTER_COLOR_PRIORITIZED: Color = PRIMARY_BACKGROUND_COLOR;
 pub const ENCOUNTER_COLOR_FOCUSED: Color = Color::rgb(0.23, 0.47, 0.4);
 pub const ENCOUNTER_COLOR_ACTIVE: Color = Color::rgb(0.18, 0.38, 0.32);
 pub const ENCOUNTER_COLOR_BLOCKED: Color = Color::rgb(0.4, 0.3, 0.4);
+
+pub const DEFAULT_AMBIENT: AmbientLight = AmbientLight {
+    color: Color::rgb(0.2, 0.1, 0.1),
+    brightness: 0.02,
+};
+
+pub const DEFAULT_CLEAR: Color = Color::rgb(0.75, 0.75, 0.75);

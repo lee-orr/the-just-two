@@ -22,6 +22,8 @@ pub fn generate_encounter(
     let initial_details = initial_details.map(|v| v.clone()).unwrap_or_default();
     commands.remove_resource::<encounter_setup_types::EncounterInitialDetails>();
     commands.insert_resource(encounter_setup_types::EncounterSetup {
+        title: initial_details.title,
+        introduction: initial_details.introduction,
         location: initial_details
             .location
             .and_then(|v| locations.get(&v).cloned()),

@@ -24,7 +24,7 @@ impl Plugin for GameOverPlugin {
                     process_keyboard_input,
                     (focused_button_activated.pipe(process_input)),
                 )
-                    .run_if(in_state(AppState::InGame)),
+                    .run_if(in_state(GameState::Failed)),
             );
     }
 }

@@ -11,7 +11,7 @@ use std::time::Duration;
 use app_state::AppState;
 use assets::{MainGameAssetPlugin, MainGameAssets};
 use bevy::{
-    asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig,
+    a11y::accesskit::Point, asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig,
     input::common_conditions::input_toggle_active, prelude::*,
 };
 
@@ -72,6 +72,7 @@ fn main() {
                 .run_if(input_toggle_active(false, KeyCode::F1)),
         )
         .add_systems(Startup, setup)
+        .add_systems(Update, fix_light)
         .run();
 }
 
@@ -92,4 +93,20 @@ fn setup(mut commands: Commands) {
         },
         ..default()
     });
+}
+
+fn fix_light(
+    mut directional: Query<&mut DirectionalLight, Added<DirectionalLight>>,
+    mut point: Query<&mut PointLight, Added<PointLight>>,
+) {
+    for mut light in directional.iter_mut() {
+        if !light.shadows_enabled {
+            light.shadows_enabled = true;
+        }
+    }
+    for mut light in point.iter_mut() {
+        if !light.shadows_enabled {
+            light.shadows_enabled = true;
+        }
+    }
 }

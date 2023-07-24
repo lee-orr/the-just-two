@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use crate::{
     assets::MainGameAssets,
     materialized_scene::{MaterializedScene, MaterializedSceneBundle, MaterializedSceneReference},
-    toon_material::ToonMaterial,
+    toon_material::{create_material_with_pallet, ToonMaterial},
 };
 
 use super::{
@@ -59,10 +59,10 @@ fn setup_materials(
         .map(|(name, color_texture)| {
             (
                 name.clone(),
-                materials.add(ToonMaterial {
-                    color_texture: Some(color_texture.clone()),
-                    shadow_texture: Some(main_assets.shadow_gradient.clone()),
-                }),
+                materials.add(create_material_with_pallet(
+                    color_texture,
+                    main_assets.as_ref(),
+                )),
             )
         })
         .collect();

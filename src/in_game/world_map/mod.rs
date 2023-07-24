@@ -9,7 +9,7 @@ use crate::{
     assets::MainGameAssets,
     in_game::mission::mission_types::MissionStage,
     materialized_scene::{MaterializedScene, MaterializedSceneBundle},
-    toon_material::ToonMaterial,
+    toon_material::{create_material_with_pallet, ToonMaterial},
     ui::{
         buttons::{focus_button, focused_button_activated, TypedFocusedButtonQuery},
         classes::*,
@@ -87,10 +87,10 @@ fn spawn_world_map(
 ) {
     commands.insert_resource(DEFAULT_AMBIENT);
     commands.insert_resource(ClearColor(DEFAULT_CLEAR));
-    let material = materials.add(ToonMaterial {
-        color_texture: Some(assets.default_color_pallet.clone()),
-        shadow_texture: Some(assets.shadow_gradient.clone()),
-    });
+    let material = materials.add(create_material_with_pallet(
+        &assets.default_color_pallet,
+        assets.as_ref(),
+    ));
     commands.spawn((
         WorldMapEntity,
         MaterializedSceneBundle {

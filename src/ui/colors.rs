@@ -34,8 +34,8 @@ pub const ENCOUNTER_COLOR_ACTIVE: Color = Color::rgb(0.18, 0.38, 0.32);
 pub const ENCOUNTER_COLOR_BLOCKED: Color = Color::rgb(0.4, 0.3, 0.4);
 
 pub const DEFAULT_AMBIENT: AmbientLight = AmbientLight {
-    color: Color::rgb(0.2, 0.1, 0.1),
-    brightness: 0.02,
+    color: Color::rgb(1., 1., 1.),
+    brightness: 0.26,
 };
 
 pub const DEFAULT_CLEAR: Color = Color::rgb(0.75, 0.75, 0.75);

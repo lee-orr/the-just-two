@@ -1,15 +1,11 @@
-use bevy::{
-    prelude::*,
-    reflect::{TypePath, TypeUuid},
-    render::render_resource::AsBindGroup,
-};
+use bevy::prelude::*;
 
 use crate::assets::MainGameAssets;
 
 pub struct ToonMaterialPlugin;
 
 impl Plugin for ToonMaterialPlugin {
-    fn build(&self, app: &mut App) {
+    fn build(&self, _app: &mut App) {
         // app.add_plugins(MaterialPlugin::<ToonMaterial>::default());
     }
 }

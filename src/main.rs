@@ -11,7 +11,7 @@ use std::time::Duration;
 use app_state::AppState;
 use assets::{MainGameAssetPlugin, MainGameAssets};
 use bevy::{
-    a11y::accesskit::Point, asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig,
+    asset::ChangeWatcher, core_pipeline::clear_color::ClearColorConfig,
     input::common_conditions::input_toggle_active, prelude::*,
 };
 
